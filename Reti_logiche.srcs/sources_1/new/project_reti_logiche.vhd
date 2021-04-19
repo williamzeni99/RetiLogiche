@@ -1,21 +1,21 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
+-- Company:
+-- Engineer:
+--
 -- Create Date: 03/29/2021 10:52:26 AM
--- Design Name: 
+-- Design Name:
 -- Module Name: project_reti_logiche - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
+-- Project Name:
+-- Target Devices:
+-- Tool Versions:
+-- Description:
+--
+-- Dependencies:
+--
 -- Revision:
 -- Revision 0.01 - File Created
 -- Additional Comments:
--- 
+--
 ----------------------------------------------------------------------------------
 
 
@@ -43,9 +43,10 @@ entity project_reti_logiche is
 end project_reti_logiche;
 
 architecture Behavioral of project_reti_logiche is
-    type state is ( BEGIN, INIT, GET_DIM, GET_MINDELTA, NEW_PIXEL, DONE, MEMRW);
+    type state is (BEGIN, INIT, GET_DIM, GET_MINDELTA, NEW_PIXEL, DONE, MEMRW);
     signal next_state, prev_state: state;
+    --lool
 
-begin 
+begin
 
 end Behavioral;
