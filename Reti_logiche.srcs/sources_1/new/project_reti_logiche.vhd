@@ -38,12 +38,14 @@ entity project_reti_logiche is
            o_done : out STD_LOGIC;
            o_en : out STD_LOGIC;
            o_we : out STD_LOGIC;
-           o_data : out std_logic_vector(7 downto 0));
+           o_data : out std_logic_vector(7 downto 0)
+           );
 end project_reti_logiche;
 
 architecture Behavioral of project_reti_logiche is
+    type state is ( BEGIN, INIT, GET_DIM, GET_MINDELTA, NEW_PIXEL, DONE, MEMRW);
+    signal next_state, prev_state: state;
 
-begin
-
+begin 
 
 end Behavioral;
