@@ -43,10 +43,31 @@ entity project_reti_logiche is
 end project_reti_logiche;
 
 architecture Behavioral of project_reti_logiche is
-    type state is (BEGIN, INIT, GET_DIM, GET_MINDELTA, NEW_PIXEL, DONE, MEMRW);
-    signal next_state, prev_state: state;
-    --lool
+    type state_type is (START, INIT, GET_DIM, GET_MINDELTA, NEW_PIXEL, DONE, MEMRW);
+    signal next_state, prev_state: state_type;
+
+    signal max_pixel_value: integer range 0 to 255 := 0;
+    signal min_pixel_value: integer range 0 to 255 := 255;
+    signal delta_value: integer range 0 to 255 := 0;
+    signal shift_level: integer range 0 to 8:= 0;
+    signal new_pixel_value: integer range 0 to 255:=0;
+    signal temp_pixel: integer range 0 to 255 := 0;
+    signal curr_address: std_logic_vector(15 downto 0);
+    signal dim_address: std_logic_vector(15 downto 0);
+    signal o_address_next: std_logic_vector(15 downto 0);
+    signal o_done_next: std_logic_vector(15 downto 0);
+    signal o_en_next: std_logic_vector(15 downto 0);
+    signal o_we_next: std_logic_vector(15 downto 0);
+    signal o_data_next: std_logic_vector(15 downto 0);
 
 begin
+  process(i_clk,i_rst)
+    begin
+      if(i_rst='1')
+        --reset
+      elsif(rising_edge(i_clk))
+        --setvalori
+      end if;
+  end process;
 
 end Behavioral;
