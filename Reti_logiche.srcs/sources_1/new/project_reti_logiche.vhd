@@ -54,7 +54,7 @@ architecture Behavioral of project_reti_logiche is
     signal new_pixel_value: integer range 0 to 255:=0;
     signal temp_pixel: integer range 0 to 255 := 0;
     signal curr_address: std_logic_vector(15 downto 0);
-    signal dim_address: std_logic_vector(15 downto 0):
+    signal dim_address: std_logic_vector(15 downto 0);
 
     --signal to work with
     signal max_pixel_value_cp: integer range 0 to 255 := 0;
@@ -68,15 +68,15 @@ architecture Behavioral of project_reti_logiche is
 
     --signal to update output
     signal o_address_next: std_logic_vector(15 downto 0);
-    signal o_done_next: std_logic_vector(15 downto 0);
-    signal o_en_next: std_logic_vector(15 downto 0);
-    signal o_we_next: std_logic_vector(15 downto 0);
-    signal o_data_next: std_logic_vector(15 downto 0);
+    signal o_done_next: std_logic;
+    signal o_en_next: std_logic;
+    signal o_we_next: std_logic;
+    signal o_data_next: std_logic_vector(7 downto 0);
 
 begin
   process(i_clk,i_rst)
     begin
-      if(i_rst='1')
+      if(i_rst='1') then
         max_pixel_value<=0;
         min_pixel_value<=0;
         delta_value<=0;
