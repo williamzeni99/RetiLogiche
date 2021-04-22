@@ -21,7 +21,7 @@ type ram_type is array (65535 downto 0) of std_logic_vector(7 downto 0);
 
 
 signal RAM: ram_type := (0 => std_logic_vector(to_unsigned(  2  , 8)), 
-                         1 => std_logic_vector(to_unsigned(  3  , 8)), 
+                         1 => std_logic_vector(to_unsigned(  2  , 8)), 
                          2 => std_logic_vector(to_unsigned(  46  , 8)),  
                          3 => std_logic_vector(to_unsigned(  131  , 8)), 
                          4 => std_logic_vector(to_unsigned(  62  , 8)), 
