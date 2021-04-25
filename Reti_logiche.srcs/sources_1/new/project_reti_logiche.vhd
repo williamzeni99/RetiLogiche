@@ -103,7 +103,6 @@ begin
     begin 
      o_done_next <= '0';
      o_data_next <= "00000000";
-     o_address_next <=curr_address;
 
      max_pixel_value_cp<= max_pixel_value;
      min_pixel_value_cp<=min_pixel_value;
@@ -174,7 +173,9 @@ begin
             elsif (prev_state=READ_PIXEL) then
                next_state<=GET_MINMAX; 
             elsif (prev_state=GET_PIXEL) then
-               next_state<=CALC_NEWPIXEL;                     
+               next_state<=CALC_NEWPIXEL;
+            elsif (prev_state=CALC_NEWPIXEL) then
+                next_state<=CALC_NEWPIXEL;                 
             end if;
 
         when GET_RC =>
@@ -243,20 +244,28 @@ begin
             
           when GET_PIXEL=>                
             o_address_next<=curr_address;
+            m_cp<=0;
+            i_cp<=0;
             next_state<=WAIT_MEM;
             
-         when CALC_NEWPIXEL =>   
-            temp_pixel_value:=conv_integer(i_data)- conv_integer(min_pixel_value);
-            m_cp<=conv_integer(shift_level);
-            for j in 1 to m loop
-                temp_pixel_value:=temp_pixel_value*2;
-            end loop;
-            if (temp_pixel_value<255) then
-                new_pixel_cp<= conv_std_logic_vector(temp_pixel_value,8);
+         when CALC_NEWPIXEL =>
+            if (i=0) then
+                temp_pixel_value:=conv_integer(i_data)- conv_integer(min_pixel_value);
+                m_cp<=conv_integer(shift_level); 
+                i_cp<=i+1;               
+                next_state<=WAIT_MEM;
+            elsif (i<= m and i>0) then
+                temp_pixel_value:=temp_pixel_value*2; 
+                i_cp<=i+1;
+                next_state<=WAIT_MEM;
             else
-                new_pixel_cp<=conv_std_logic_vector(255,8);
-            end if;  
-            next_state<=ABILIT_WRITE;               
+                if (temp_pixel_value<255) then
+                    new_pixel_cp<= conv_std_logic_vector(temp_pixel_value,8);
+                else
+                    new_pixel_cp<=conv_std_logic_vector(255,8);
+                end if;  
+                next_state<=ABILIT_WRITE;
+            end if;               
             
          when WRITE_PIXEL => 
             o_address_next<=dim_address;
