@@ -31,6 +31,7 @@ architecture Behavioral of project_reti_logiche is
     signal new_pixel: std_logic_vector(7 downto 0):= (others => '0');
     signal curr_address: std_logic_vector(15 downto 0) :=(others => '0');
     signal dim_address: std_logic_vector(15 downto 0) :=(others => '0');
+    signal temp_pixel_value: integer:=0;
     signal m,k,t,i: integer:=0;
 
     --signal to work with
@@ -43,6 +44,7 @@ architecture Behavioral of project_reti_logiche is
     signal new_pixel_cp: std_logic_vector(7 downto 0):= (others => '0');
     signal curr_address_cp: std_logic_vector(15 downto 0) :=(others => '0');
     signal dim_address_cp: std_logic_vector(15 downto 0) :=(others => '0');
+    signal temp_pixel_value_cp: integer:=0;
     signal m_cp, k_cp, t_cp, i_cp : integer:=0;
 
     --signal to update output
@@ -65,6 +67,7 @@ begin
         new_pixel<=(others => '0');
         dim_address<=(others => '0');
         curr_state<=START;
+        temp_pixel_value<=0;
         m<=0;
         k<=0;
         t<=0;
@@ -85,7 +88,8 @@ begin
         shift_level<=shift_level_cp;      
         new_pixel<=new_pixel_cp;
         curr_address<=curr_address_cp;
-        dim_address<=dim_address_cp;       
+        dim_address<=dim_address_cp;
+        temp_pixel_value<=temp_pixel_value_cp;       
         m<=m_cp;
         k<=k_cp;
         t<=t_cp;
@@ -95,15 +99,13 @@ begin
       end if;
   end process;
     
-  process(curr_address, n_col, n_row, curr_state,prev_state, i_start, i_data, dim_address, shift_level, new_pixel, max_pixel_value, min_pixel_value, delta_value, shift_level,m, k, t, i)    
-    variable dim: std_logic_vector(15 downto 0);     
-    variable last: std_logic_vector(31 downto 0);    
-    variable temp_pixel_value:integer:=0;   
+  process(curr_address,i_start, i_data, n_col, n_row, curr_state,prev_state, dim_address, shift_level, new_pixel, max_pixel_value, min_pixel_value, delta_value, shift_level, temp_pixel_value,m, k, t, i)    
+    variable dim: integer;     
+    variable last: integer;      
     
     begin 
-     o_done_next <= '0';
-     o_data_next <= "00000000";
-
+     n_col_cp<=n_col;
+     n_row_cp<=n_row;
      max_pixel_value_cp<= max_pixel_value;
      min_pixel_value_cp<=min_pixel_value;
      delta_value_cp<=delta_value;
@@ -111,6 +113,7 @@ begin
      new_pixel_cp<=new_pixel;
      curr_address_cp<=curr_address;
      dim_address_cp<=dim_address;
+     temp_pixel_value_cp<=temp_pixel_value;
      m_cp<=m;
      k_cp<=k;
      t_cp<=t;
@@ -125,8 +128,6 @@ begin
         when INIT =>
             n_col_cp<=(others => '0');
             n_row_cp<=(others => '0');
-            o_en_next <= '0';
-            o_we_next <= '0';
             max_pixel_value_cp<=(others =>'0');
             min_pixel_value_cp<=(others=> '1');
             delta_value_cp<=(others=> '0');
@@ -134,6 +135,7 @@ begin
             new_pixel_cp<=(others => '0');
             curr_address_cp<=(others => '0');
             dim_address_cp<=(others => '0');
+            temp_pixel_value_cp<=0;
             m_cp<=0;
             k_cp<=0;
             t_cp<=0;
@@ -175,7 +177,9 @@ begin
             elsif (prev_state=GET_PIXEL) then
                next_state<=CALC_NEWPIXEL;
             elsif (prev_state=CALC_NEWPIXEL) then
-                next_state<=CALC_NEWPIXEL;                 
+                next_state<=CALC_NEWPIXEL; 
+            elsif (prev_state= WRITE_PIXEL) then
+                next_state<=DONE;        
             end if;
 
         when GET_RC =>
@@ -197,9 +201,9 @@ begin
         when GET_DIM=>
             if (n_row=0 or n_col=0) then
                 next_state<=DONE;            
-            else    
-                dim:= (n_col)*(n_row)+2; 
-                dim_address_cp<=dim;
+            else   
+                dim:= conv_integer(n_col)* conv_integer(n_row)+2;
+                dim_address_cp<=conv_std_logic_vector(dim,16);
                 next_state<=WAIT_MEM;    
             end if;             
             
@@ -214,7 +218,7 @@ begin
             end if;    
             
          when GET_MINMAX =>   
-            if (i_data> max_pixel_value) then --siamo sicuri che il controllo sia su unsigned?
+            if (i_data> max_pixel_value) then 
                 max_pixel_value_cp<=i_data;
             end if;
             if (i_data< min_pixel_value) then             
@@ -250,12 +254,12 @@ begin
             
          when CALC_NEWPIXEL =>
             if (i=0) then
-                temp_pixel_value:=conv_integer(i_data)- conv_integer(min_pixel_value);
+                temp_pixel_value_cp<=conv_integer(i_data)- conv_integer(min_pixel_value);                
                 m_cp<=conv_integer(shift_level); 
                 i_cp<=i+1;               
                 next_state<=WAIT_MEM;
             elsif (i<= m and i>0) then
-                temp_pixel_value:=temp_pixel_value*2; 
+                temp_pixel_value_cp<=temp_pixel_value*2; 
                 i_cp<=i+1;
                 next_state<=WAIT_MEM;
             else
@@ -272,9 +276,9 @@ begin
             o_data_next<=new_pixel;
             dim_address_cp<=dim_address+1;
             curr_address_cp<=curr_address+1;
-            last:="0000000000000010"*(n_col)*(n_row)+2;            
-            if (dim_address+1 =last) then
-                next_state<=DONE;
+            last:=2* conv_integer(n_col)* conv_integer(n_row)+2;            
+            if (dim_address+1 = conv_std_logic_vector(last,16)) then
+                next_state<=WAIT_MEM;
             else
                 next_state<=ABILIT_READ;
             end if;            
@@ -282,6 +286,8 @@ begin
          when DONE=>
             o_en_next<='0';
             o_we_next<='0';
+            o_data_next<=(others =>'0');
+            o_address_next<=(others =>'0');
             o_done_next<='1';
             next_state<=WAITINGPIC;   
             
@@ -291,7 +297,7 @@ begin
                 next_state<=START;
             else 
                 next_state<=WAITINGPIC;
-            end if;   
+            end if;
                      
     end case;
   end process;
