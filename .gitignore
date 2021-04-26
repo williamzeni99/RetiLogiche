@@ -3,4 +3,5 @@
 /Reti_logiche.ip_user_files
 /Reti_logiche.runs
 /Reti_logiche.sim
-
+/project_tb_behav.wcfg
+/Reti_logiche.srcs/sim_1
