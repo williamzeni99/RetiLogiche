@@ -35,8 +35,8 @@ architecture Behavioral of project_reti_logiche is
     signal new_pixel:         std_logic_vector(7 downto 0)  := (others => '0');
     signal curr_address:      std_logic_vector(15 downto 0) := (others => '0');
     signal dim_address:       std_logic_vector(15 downto 0) := (others => '0');
-    signal temp_pixel_value:  integer:=0;
-    signal m,k,t,i:           integer:=0;
+    signal temp_pixel_value:  integer                       := 0;
+    signal m,k,t,i:           integer                       := 0;
 
     --signal to work with
     signal n_col_cp:                std_logic_vector(7 downto 0)  := (others => '0');
