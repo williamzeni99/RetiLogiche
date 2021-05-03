@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[11pt, a4paper]{article}
 
 % Language setting
 % Replace `english' with e.g. `spanish' to change the document language
@@ -29,97 +29,98 @@
 \makeindex
 
 \begin{document}
-\maketitle
 
+\begin{figure}[t]
+  \centering
+  \vspace{3cm}
+  %\includegraphics[width=65mm , height= 47mm]{Logo_Politecnico_Milano.png}
+  \includegraphics[scale=0.4]{Logo_Politecnico_Milano.png}
+  \vspace{3cm}
+\end{figure}
+
+\maketitle
 \renewcommand{\abstractname}{ }
 \begin{abstract}
   \centering
-  Progetto sostenuto presso il Politecnico di Milano, diretto dal professor Gianluca Palermo nell'anno 2020/21.
+  Progetto sostenuto presso il Politecnico di Milano dipartimento di Elettronica, Informazione e Bioingegneria, diretto dal professor Gianluca Palermo nell'anno 2020/21.
 \end{abstract}
-
-\begin{figure}[b]
-  \centering
-  \vspace{3cm}
-  \includegraphics[width=65mm , height= 47mm]{Logo_Politecnico_Milano.png}
-\end{figure}
-
 
 \pagebreak
 \tableofcontents
 \pagebreak
 
 
-\section{Introduzione} %\index{Introduzione}
-\subsection{Scopo del progetto} %\index{Introduzione! Scopo del progetto}
+\section{Introduzione}
+\subsection{Scopo del progetto}
 Write somenthing here
 
-\subsection{Specifiche generali} %\index{Introduzione! Specifiche generali}
+\subsection{Specifiche generali}
 Write somenthing here
 
-\subsection{Interfaccia del componente} %\index{Introduzione! Interfaccia del componente}
+\subsection{Interfaccia del componente}
 Write somenthing here
 
-\subsection{Dati e Descrizione memoria} %\index{Introduzione! Dati e Descrizione memoria}
+\subsection{Dati e Descrizione memoria}
 Write somenthing here
 
-\section{Desing Pattern} %\index{Desing Pattern}
-\subsection{Scelte Progettuali} %\index{Desing Pattern! Scelte Progettuali}
+\section{Desing Pattern}
+\subsection{Scelte Progettuali}
 Write somenthing here
 
 \subsection{Elenco Stati}
 
-\subsubsection{START} %\index{Desing Pattern! Scelte Progettuali!START}
+\subsubsection{START}
 Lo stato di \texttt{START} è stato pensato come stato di attesa iniziale. Questo stato viene invocato in due situazioni differenti: se il segnale di \texttt{i\_rst} viene portato alto, oppure quando il segnale \texttt{i\_start} viene riportato basso dopo la computazione di un immagine. Lo stato \texttt{START} rimane tale fino a quando il segnale \texttt{i\_start} non venga posto alto. In quel momento lo stato successivo viene impostato \texttt{INIT}.
 
-\subsubsection{INIT}%\index{Desing Pattern! Scelte Progettuali!INIT}
+\subsubsection{INIT}
 Lo stato \texttt{INIT} è uno stato di transizione nel quale il processore si assicura che i segnali siano inizializzati con i valori opportuni. Successivamente imposta lo stato prossimo a \texttt{ABILIT\_READ}.
 
-\subsubsection{ABILIT\_READ}%\index{Desing Pattern! Scelte Progettuali! ABILIT\_READ}
+\subsubsection{ABILIT\_READ}
 Lo stato \texttt{ABILIT\_READ} è lo stato attraverso il quale abilitiamo la memoria alla sola lettura. Viene richiamato in momenti diversi del progetto ed in base allo stato chiamante, instrada lo stato prossimo a quello opportuno.
 
-\subsubsection{ABILIT\_WRITE}%\index{Desing Pattern! Scelte Progettuali! ABILIT\_WRITE}
+\subsubsection{ABILIT\_WRITE}
 Lo stato \texttt{ABILIT\_WRITE} abilita la memoria alla lettura e alla scrittura. Viene invocato subito dopo aver computato il valore del nuovo pixel e in nessun altro momento. Instrada poi lo stato prossimo a \texttt{WRITE\_PIXEL}.
 
-\subsubsection{WAIT\_MEM}%\index{Desing Pattern! Scelte Progettuali!WAIT\_MEM}
+\subsubsection{WAIT\_MEM}
 Lo stato \texttt{WAIT\_MEM} è uno stato centrale durante la gestione del flusso di dati. Sostanzialmente "spreca" un ciclo di clock. Questo ci assicura sia in caso di scrittura, sia in caso di lettura che i segnali in ingress e in uscita siano letti o scritti correttamente. Nel caso specifico alla quale ci rifacciamo, alcune chiamate a questo stato potevano essere evitate. Questa informazione è emersa durante lo stress test a cui il processore è stato sottoposto. Tuttavia, abbiamo preferito lasciarle per mantenere la stuttura del processore. Ciò, a nostro avviso, permette una maggior robustezza, sebbene una aumento nella latenza della computazione.
 
-\subsubsection{GET\_RC}%\index{Desing Pattern! Scelte Progettuali! GET\_RC}
+\subsubsection{GET\_RC}
 Lo stato \texttt{GET\_RC} è uno stato in preparazione al calcolo della dimensione dell'immagine e dei punti in cui bisognerà scrivere all'interno della memoria. Lo stato \texttt{GET\_RC} viene invocato dopo l'abilitazione della memoria alla lettura. Questo stato si occupa del recuperare i valori dalla memoria e aggiornare i segnali \texttt{n\_col} e \texttt{n\_row}.
 
-\subsubsection{GET\_DIM}%\index{Desing Pattern! Scelte Progettuali! GET\_DIM}
+\subsubsection{GET\_DIM}
 Write somenthing here
 
-\subsubsection{READ\_PIXEL}%\index{Desing Pattern! Scelte Progettuali! READ\_PIXEL}
+\subsubsection{READ\_PIXEL}
 Write somenthing here
 
-\subsubsection{GET\_MINMAX}%\index{Desing Pattern! Scelte Progettuali! GET\_MINMAX}
+\subsubsection{GET\_MINMAX}
 Write somenthing here
 
-\subsubsection{GET\_DELTA}%\index{Desing Pattern! Scelte Progettuali! GET\_DELTA}
+\subsubsection{GET\_DELTA}
 Write somenthing here
 
-\subsubsection{CALC\_SHIFT}%\index{Desing Pattern! Scelte Progettuali! CALC\_SHIFT}
+\subsubsection{CALC\_SHIFT}
 Write somenthing here
 
-\subsubsection{GET\_PIXEL}%\index{Desing Pattern! Scelte Progettuali!GET\_PIXEL}
+\subsubsection{GET\_PIXEL}
 Write somenthing here
 
-\subsubsection{CALC\_NEWPIXEL}%\index{Desing Pattern! Scelte Progettuali!CALC\_NEWPIXEL}
+\subsubsection{CALC\_NEWPIXEL}
 Write somenthing here
 
-\subsubsection{WRITE\_PIXEL}%\index{Desing Pattern! Scelte Progettuali!WRITE\_PIXEL}
+\subsubsection{WRITE\_PIXEL}
 Write somenthing here
 
-\subsubsection{DONE}%\index{Desing Pattern! Scelte Progettuali!DONE}
+\subsubsection{DONE}
 Write somenthing here
 
-\subsubsection{WAITINGPIC}%\index{Desing Pattern! Scelte Progettuali!WAITINGPIC}
+\subsubsection{WAITINGPIC}
 Write somenthing here
 
-\section{Risultati dei Test}%\index{Risultati dei Test}
+\section{Risultati dei Test}
 Write somenthing here!
 
-\section{Conclusioni}%\index{Conclusioni}
+\section{Conclusioni}
 Write somenthing here
 
 \end{document}
