@@ -9,9 +9,11 @@
 \usepackage[letterpaper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
 
 % Useful packages
+\usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{makeidx}
 
 \title{Progetto di Reti Logiche}
 \author{
@@ -21,87 +23,100 @@
   Cristina Urso\\
   \texttt{matricola 10599689}
 }
-\renewcommand{\abstractname}{}
 
+\graphicspath{ {./graphics} }
+
+\makeindex
 
 \begin{document}
 \maketitle
 
+\renewcommand{\abstractname}{ }
 \begin{abstract}
   \centering
-  Progetto sostenuto presso il Politecnico di Milano, diretto dal professor Gianluca Palermo nell'anno 2021.
+  Progetto sostenuto presso il Politecnico di Milano, diretto dal professor Gianluca Palermo nell'anno 2020/21.
 \end{abstract}
 
-\section{introduction}
-\subsection{Scopo del progetto}
+\begin{figure}[b]
+  \centering
+  \includegraphics[scale=0.4]{Logo_Politecnico_Milano.png}
+\end{figure}
+
+
+\pagebreak
+\tableofcontents
+\pagebreak
+
+
+\section{Introduzione} %\index{Introduzione}
+\subsection{Scopo del progetto} %\index{Introduzione! Scopo del progetto}
 Write somenthing here
 
-\subsection{Specifiche generali}
+\subsection{Specifiche generali} %\index{Introduzione! Specifiche generali}
 Write somenthing here
 
-\subsection{Interfaccia del componente}
+\subsection{Interfaccia del componente} %\index{Introduzione! Interfaccia del componente}
 Write somenthing here
 
-\subsection{Dati e Descrizione memoria}
+\subsection{Dati e Descrizione memoria} %\index{Introduzione! Dati e Descrizione memoria}
 Write somenthing here
 
-\section{Desing Pattern}
-\subsection{Scelte Progettuali}
+\section{Desing Pattern} %\index{Desing Pattern}
+\subsection{Scelte Progettuali} %\index{Desing Pattern! Scelte Progettuali}
 Write somenthing here
 
-\subsection{Descrizione degli Stati}
-\subsubsection{START}
+\subsubsection{START} %\index{Desing Pattern! Scelte Progettuali!START}
 Lo stato di \texttt{START} è stato pensato come stato di attesa iniziale. Questo stato viene invocato in due situazioni differenti: se il segnale di \texttt{i\_rst} viene portato alto, oppure quando il segnale \texttt{i\_start} viene riportato basso dopo la computazione di un immagine. Lo stato \texttt{START} rimane tale fino a quando il segnale \texttt{i\_start} non venga posto alto. In quel momento lo stato successivo viene impostato \texttt{INIT}.
 
-\subsubsection{INIT}
-Lo stato \texttt{INIT} è uno stato di transizione nel quale il processore si assicura che i segnali siano inizializzati con i valori opportuni. Successivamente imposta lo stato prossimo a \texttt{ABILIT READ}.
+\subsubsection{INIT}%\index{Desing Pattern! Scelte Progettuali!INIT}
+Lo stato \texttt{INIT} è uno stato di transizione nel quale il processore si assicura che i segnali siano inizializzati con i valori opportuni. Successivamente imposta lo stato prossimo a \texttt{ABILIT\_READ}.
 
-\subsubsection{ABILIT READ}
-Lo stato \texttt{ABILIT READ} è lo stato attraverso il quale abilitiamo la memoria alla sola lettura. Viene richiamato in momenti diversi del progetto ed in base allo stato chiamante, instrada lo stato prossimo a quello opportuno.
+\subsubsection{ABILIT\_READ}%\index{Desing Pattern! Scelte Progettuali! ABILIT\_READ}
+Lo stato \texttt{ABILIT\_READ} è lo stato attraverso il quale abilitiamo la memoria alla sola lettura. Viene richiamato in momenti diversi del progetto ed in base allo stato chiamante, instrada lo stato prossimo a quello opportuno.
 
-\subsubsection{ABILIT WRITE}
-Lo stato \texttt{ABILIT WRITE} abilita la memoria alla lettura e alla scrittura. Viene invocato subito dopo aver computato il valore del nuovo pixel e in nessun altro momento. Instrada poi lo stato prossimo a \texttt{WRITE PIXEL}.
+\subsubsection{ABILIT\_WRITE}%\index{Desing Pattern! Scelte Progettuali! ABILIT\_WRITE}
+Lo stato \texttt{ABILIT\_WRITE} abilita la memoria alla lettura e alla scrittura. Viene invocato subito dopo aver computato il valore del nuovo pixel e in nessun altro momento. Instrada poi lo stato prossimo a \texttt{WRITE\_PIXEL}.
 
-\subsubsection{WAIT MEM}
-Lo stato \texttt{WAIT MEM} è uno stato centrale durante la gestione del flusso di dati. Sostanzialmente "spreca" un ciclo di clock. Questo ci assicura sia in caso di scrittura, sia in caso di lettura che i segnali in ingress e in uscita siano letti o scritti correttamente. Nel caso specifico alla quale ci rifacciamo, alcune chiamate a questo stato potevano essere evitate. Questa informazione è emersa durante lo stress test a cui il processore è stato sottoposto. Tuttavia, abbiamo preferito lasciarle per mantenere la stuttura del processore. Ciò, a nostro avviso, permette una maggior robustezza, sebbene una aumento nella latenza della computazione.
+\subsubsection{WAIT\_MEM}%\index{Desing Pattern! Scelte Progettuali!WAIT\_MEM}
+Lo stato \texttt{WAIT\_MEM} è uno stato centrale durante la gestione del flusso di dati. Sostanzialmente "spreca" un ciclo di clock. Questo ci assicura sia in caso di scrittura, sia in caso di lettura che i segnali in ingress e in uscita siano letti o scritti correttamente. Nel caso specifico alla quale ci rifacciamo, alcune chiamate a questo stato potevano essere evitate. Questa informazione è emersa durante lo stress test a cui il processore è stato sottoposto. Tuttavia, abbiamo preferito lasciarle per mantenere la stuttura del processore. Ciò, a nostro avviso, permette una maggior robustezza, sebbene una aumento nella latenza della computazione.
 
-\subsubsection{GET RC}
+\subsubsection{GET\_RC}%\index{Desing Pattern! Scelte Progettuali! GET\_RC}
+Lo stato \texttt{GET\_RC} è uno stato in preparazione al calcolo della dimensione dell'immagine e dei punti in cui bisognerà scrivere all'interno della memoria. Lo stato \texttt{GET\_RC} viene invocato dopo l'abilitazione della memoria alla lettura. Questo stato si occupa del recuperare i valori dalla memoria e aggiornare i segnali \texttt{n\_col} e \texttt{n\_row}.
+
+\subsubsection{GET\_DIM}%\index{Desing Pattern! Scelte Progettuali! GET\_DIM}
 Write somenthing here
 
-\subsubsection{GET DIM}
+\subsubsection{READ\_PIXEL}%\index{Desing Pattern! Scelte Progettuali! READ\_PIXEL}
 Write somenthing here
 
-\subsubsection{READ PIXEL}
+\subsubsection{GET\_MINMAX}%\index{Desing Pattern! Scelte Progettuali! GET\_MINMAX}
 Write somenthing here
 
-\subsubsection{GET MINMAX}
+\subsubsection{GET\_DELTA}%\index{Desing Pattern! Scelte Progettuali! GET\_DELTA}
 Write somenthing here
 
-\subsubsection{GET DELTA}
+\subsubsection{CALC\_SHIFT}%\index{Desing Pattern! Scelte Progettuali! CALC\_SHIFT}
 Write somenthing here
 
-\subsubsection{CALC SHIFT}
+\subsubsection{GET\_PIXEL}%\index{Desing Pattern! Scelte Progettuali!GET\_PIXEL}
 Write somenthing here
 
-\subsubsection{GET PIXEL}
+\subsubsection{CALC\_NEWPIXEL}%\index{Desing Pattern! Scelte Progettuali!CALC\_NEWPIXEL}
 Write somenthing here
 
-\subsubsection{CALC NEWPIXEL}
+\subsubsection{WRITE\_PIXEL}%\index{Desing Pattern! Scelte Progettuali!WRITE\_PIXEL}
 Write somenthing here
 
-\subsubsection{WRITE PIXEL}
+\subsubsection{DONE}%\index{Desing Pattern! Scelte Progettuali!DONE}
 Write somenthing here
 
-\subsubsection{DONE}
+\subsubsection{WAITINGPIC}%\index{Desing Pattern! Scelte Progettuali!WAITINGPIC}
 Write somenthing here
 
-\subsubsection{WAITINGPIC}
-Write somenthing here
-
-\section{Risultati dei Test}
+\section{Risultati dei Test}%\index{Risultati dei Test}
 Write somenthing here!
 
-\section{Conclusioni}
+\section{Conclusioni}%\index{Conclusioni}
 Write somenthing here
 
 \end{document}
