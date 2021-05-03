@@ -51,19 +51,19 @@ Write somenthing here
 
 \subsection{Descrizione degli Stati}
 \subsubsection{START}
-Write somenthing here
+Lo stato di \texttt{START} è stato pensato come stato di attesa iniziale. Questo stato viene invocato in due situazioni differenti: se il segnale di \texttt{i\_rst} viene portato alto, oppure quando il segnale \texttt{i\_start} viene riportato basso dopo la computazione di un immagine. Lo stato \texttt{START} rimane tale fino a quando il segnale \texttt{i\_start} non venga posto alto. In quel momento lo stato successivo viene impostato \texttt{INIT}.
 
 \subsubsection{INIT}
-Write somenthing here
+Lo stato \texttt{INIT} è uno stato di transizione nel quale il processore si assicura che i segnali siano inizializzati con i valori opportuni. Successivamente imposta lo stato prossimo a \texttt{ABILIT READ}.
 
 \subsubsection{ABILIT READ}
-Write somenthing here
+Lo stato \texttt{ABILIT READ} è lo stato attraverso il quale abilitiamo la memoria alla sola lettura. Viene richiamato in momenti diversi del progetto ed in base allo stato chiamante, instrada lo stato prossimo a quello opportuno.
 
 \subsubsection{ABILIT WRITE}
-Write somenthing here
+Lo stato \texttt{ABILIT WRITE} abilita la memoria alla lettura e alla scrittura. Viene invocato subito dopo aver computato il valore del nuovo pixel e in nessun altro momento. Instrada poi lo stato prossimo a \texttt{WRITE PIXEL}.
 
 \subsubsection{WAIT MEM}
-Write somenthing here
+Lo stato \texttt{WAIT MEM} è uno stato centrale durante la gestione del flusso di dati. Sostanzialmente "spreca" un ciclo di clock. Questo ci assicura sia in caso di scrittura, sia in caso di lettura che i segnali in ingress e in uscita siano letti o scritti correttamente. Nel caso specifico alla quale ci rifacciamo, alcune chiamate a questo stato potevano essere evitate. Questa informazione è emersa durante lo stress test a cui il processore è stato sottoposto. Tuttavia, abbiamo preferito lasciarle per mantenere la stuttura del processore. Ciò, a nostro avviso, permette una maggior robustezza, sebbene una aumento nella latenza della computazione.
 
 \subsubsection{GET RC}
 Write somenthing here
