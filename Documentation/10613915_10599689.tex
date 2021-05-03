@@ -6,13 +6,13 @@
 
 % Set page size and margins
 % Replace `letterpaper' with`a4paper' for UK/EU standard size
-\usepackage[letterpaper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+\usepackage[a4paper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
 
 % Useful packages
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{graphicx}
-\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage[colorlinks=true, allcolors=black]{hyperref}
 \usepackage{makeidx}
 
 \title{Progetto di Reti Logiche}
@@ -39,7 +39,8 @@
 
 \begin{figure}[b]
   \centering
-  \includegraphics[scale=0.4]{Logo_Politecnico_Milano.png}
+  \vspace{3cm}
+  \includegraphics[width=65mm , height= 47mm]{Logo_Politecnico_Milano.png}
 \end{figure}
 
 
@@ -64,6 +65,8 @@ Write somenthing here
 \section{Desing Pattern} %\index{Desing Pattern}
 \subsection{Scelte Progettuali} %\index{Desing Pattern! Scelte Progettuali}
 Write somenthing here
+
+\subsection{Elenco Stati}
 
 \subsubsection{START} %\index{Desing Pattern! Scelte Progettuali!START}
 Lo stato di \texttt{START} è stato pensato come stato di attesa iniziale. Questo stato viene invocato in due situazioni differenti: se il segnale di \texttt{i\_rst} viene portato alto, oppure quando il segnale \texttt{i\_start} viene riportato basso dopo la computazione di un immagine. Lo stato \texttt{START} rimane tale fino a quando il segnale \texttt{i\_start} non venga posto alto. In quel momento lo stato successivo viene impostato \texttt{INIT}.
