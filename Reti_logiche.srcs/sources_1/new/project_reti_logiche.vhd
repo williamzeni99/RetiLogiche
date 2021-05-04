@@ -225,8 +225,8 @@ begin
                 curr_address_cp <= curr_address+1;
                 next_state      <= WAIT_MEM;
             else
-                curr_address_cp <=  "0000000000000010";
-                next_state      <=  GET_DELTA;
+                curr_address_cp <= "0000000000000010";
+                next_state      <= GET_DELTA;
             end if;
 
          when GET_MINMAX =>
