@@ -65,7 +65,12 @@ Write somenthing here
 
 \section{Desing Pattern}
 \subsection{Scelte Progettuali}
-Write somenthing here
+La struttura del progetto è stata suddivisa in due process principali: \texttt{UPDATE} e \texttt{STATES}.
+Il primo ha il compito di relazionarsi con la memoria e il secondo contiene gli stati della macchina impiegati nella equalizzazione delle immagini. In questo modo una porzione di codice è adibita esclusivamente alla computazione dei pixel (process \texttt{STATES}), mentre la rimanente si occupa dei segnali di output della \textit{entity} (process \texttt{UPDATE}).
+Per permette un corretto dialogo tra i due process è nata l'esigenza di avere dei segnali ``duplicati".
+I segnali con suffisso \texttt{\lq\_cp'} sono stati introdotti per mantere in memoria i valori computati, mentre i segnali con suffisso \texttt{\lq\_next'} sono stati implementati allo scopo di permettere agli stati di far richieste alla memoria.
+Nel particolare, per ogni ciclo di clock, durante \textit{rising\_edge}, il process \texttt{UPDATE} si risveglia, aggiornando i segnali. I segnali contenenti i valori da mantenere vengono reimpostati con i segnali \texttt{\lq\_cp'}, mentre i segnali di output della \textit{entity} sono aggiornati con i segnali \texttt{\lq\_next'}.
+
 
 \subsection{Elenco Stati}
 
@@ -79,10 +84,10 @@ Lo stato \texttt{INIT} è uno stato di transizione nel quale il processore si as
 Lo stato \texttt{ABILIT\_READ} è lo stato attraverso il quale abilitiamo la memoria alla sola lettura. Viene richiamato in momenti diversi del progetto e, in base allo stato chiamante, instrada lo stato prossimo a quello opportuno.
 
 \subsubsection{ABILIT\_WRITE}
-Lo stato \texttt{ABILIT\_WRITE} abilita la memoria alla lettura e alla scrittura. Viene invocato subito dopo aver computato il valore del nuovo pixel e in nessun altro momento. Instrada poi lo stato prossimo a \texttt{WRITE\_PIXEL}.
+Lo stato \texttt{ABILIT\_WRITE} abilita la memoria alla scrittura. Viene invocato subito dopo aver computato il valore del nuovo pixel e in nessun altro momento. Instrada poi lo stato prossimo a \texttt{WRITE\_PIXEL}.
 
 \subsubsection{WAIT\_MEM}
-Lo stato \texttt{WAIT\_MEM} è uno stato centrale durante la gestione del flusso di dati. Sostanzialmente "spreca" un ciclo di clock. Questo ci assicura sia in caso di scrittura, sia in caso di lettura, che i segnali in ingresso e in uscita siano letti o scritti correttamente. Nel caso specifico alla quale ci rifacciamo, alcune chiamate a questo stato potevano essere evitate. Questa informazione è emersa durante lo stress test a cui il processore è stato sottoposto. Tuttavia, abbiamo preferito lasciarle per mantenere la stuttura del processore. Ciò, a nostro avviso, permette una maggior robustezza, sebbene un aumento nella latenza della computazione.
+Lo stato \texttt{WAIT\_MEM} è uno stato centrale durante la gestione del flusso di dati. Sostanzialmente ``spreca" un ciclo di clock. Questo ci assicura sia in caso di scrittura, sia in caso di lettura, che i segnali in ingresso e in uscita siano letti o scritti correttamente. Nel caso specifico alla quale ci rifacciamo, alcune chiamate a questo stato potevano essere evitate. Questa informazione è emersa durante lo stress test a cui il processore è stato sottoposto. Tuttavia, si è preferito lasciarle per mantenere la stuttura del processore. Ciò dovrebbe permette una maggior robustezza, sebbene un aumento nella latenza della computazione.
 
 \subsubsection{GET\_RC}
 Lo stato \texttt{GET\_RC} è uno stato in preparazione al calcolo della dimensione dell'immagine e dei punti in cui bisognerà scrivere all'interno della memoria. Lo stato \texttt{GET\_RC} viene invocato dopo l'abilitazione della memoria alla lettura. Questo stato si occupa del recuperare i valori dalla memoria e aggiornare i segnali \texttt{n\_col} e \texttt{n\_row}.
@@ -90,8 +95,9 @@ Lo stato \texttt{GET\_RC} è uno stato in preparazione al calcolo della dimensio
 \subsubsection{GET\_DIM}
 Lo stato \texttt{GET\_DIM} è lo stato che si preoccupa di aggiornare il segnale \texttt{dim\_address} con il valore opportuno. Il calcolo $n\_col \cdot n\_row + 2$ aggiorna il segnale al primo bit libero per la scrittura.
 
+
 \subsubsection{READ\_PIXEL}
-Lo stato \texttt{READ\_PIXEL} è uno stato strettamente accopiato con lo stato \texttt{GET\_MINMAX}. Richiede alla memoria il valore del pixel e aggiorna il segnale \texttt{curr\_address} a quello successivo. In questo modo il valore del pixel sarà disponibile sul segnale \texttt{i\_data} al \texttt{rising\_edge} successivo.
+Lo stato \texttt{READ\_PIXEL} è uno stato strettamente accopiato con lo stato \texttt{GET\_MINMAX}. Richiede alla memoria il valore del pixel e aggiorna il segnale \texttt{curr\_address} a quello successivo. In questo modo il valore del pixel sarà disponibile sul segnale \texttt{i\_data} al \textit{rising\_edge} successivo.
 
 \subsubsection{GET\_MINMAX}
 Write somenthing here.
