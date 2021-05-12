@@ -1,0 +1,10 @@
+Come utilizzare il generatore
+
+Il generatore è molto semplice e intuitivo ma non completo.
+Per utilizzarlo compilare da linea di comando il file testgen.c con: 'gcc -o test testbench.c -lm' .
+
+Il programma chiederà di inserire il nome del file da generare (l'estensione .vhd verrà aggiunta automaticamente).
+Inserite successivamente le dimensioni dell'immagine da equalizzare, separate da uno spazio.
+
+Il generatore creerà, nella stessa directory in cui è contenuto, un file .vhd contenente il test.
+Ricordatevi di allegare il test al progretto in vivado!

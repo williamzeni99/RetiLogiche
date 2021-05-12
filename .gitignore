@@ -8,3 +8,9 @@
 /Reti_logiche.xpr
 /Documentation/build
 /Documentation/10613915_10599689.synctex.gz
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
