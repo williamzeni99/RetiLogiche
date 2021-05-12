@@ -8,3 +8,11 @@ Inserite successivamente le dimensioni dell'immagine da equalizzare, separate da
 
 Il generatore creerà, nella stessa directory in cui è contenuto, un file .vhd contenente il test.
 Ricordatevi di allegare il test al progretto in vivado!
+
+Se invece state utilizzando il mio progetto, la directory è già aggiunta automaticamente nelle risorse di simulazione.
+
+Per quanto riguarda il test, in sè non copre tutti i casi. Visto che la funzione rand è equalmente distribuita
+la possibilità che in un immagine, anche non troppo grande, si abbia un delta di 255 è molto probabile. Questo invalida
+la funzionalità del test che avrebbe in ingresso e in uscita la stessa immagine. Difatto con un delta di 255
+l'immagine non viene equalizzata, quindi per ovviare al problema ho ridotto il range di testing per immagini che hanno valori di pixel
+da 50 a 200.
