@@ -5,9 +5,9 @@
 /Reti_logiche.sim
 /project_tb_behav.wcfg
 /Reti_logiche.srcs/sim_1
-/Reti_logiche.xpr
 /Documentation/build
 /Documentation/10613915_10599689.synctex.gz
+Reti_logiche.xpr
 *.exe
 *.out
 *.app
