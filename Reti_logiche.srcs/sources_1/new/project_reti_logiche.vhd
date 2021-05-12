@@ -171,28 +171,40 @@ begin
             next_state<=WRITE_PIXEL;
 
         when WAIT_MEM =>
-            if (prev_state = GET_RC) then
-               if (curr_address = "0000000000000011" ) then
+            case prev_state is
+            when GET_RC =>
+                if (curr_address = "0000000000000011" ) then
                     curr_address_cp <= "0000000000000010" ;
                     next_state <= GET_DIM;
                else
                     next_state <= GET_RC;
                end if;
-            elsif (prev_state = GET_DIM) then
+               
+            when GET_DIM =>
                next_state <= READ_PIXEL;
-            elsif (prev_state = GET_DELTA) then
+               
+            when GET_DELTA =>
                 next_state <= CALC_SHIFT;
-            elsif (prev_state = CALC_SHIFT) then
+                
+            when CALC_SHIFT => 
                 next_state <= CALC_SHIFT;
-            elsif (prev_state = READ_PIXEL) then
+                
+            when READ_PIXEL => 
                next_state <= GET_MINMAX;
-            elsif (prev_state = GET_PIXEL) then
+               
+            when GET_PIXEL =>
                next_state <= CALC_NEWPIXEL;
-            elsif (prev_state = CALC_NEWPIXEL) then
+               
+            when CALC_NEWPIXEL =>
                 next_state <= CALC_NEWPIXEL;
-            elsif (prev_state = WRITE_PIXEL) then
+                
+            when WRITE_PIXEL =>
                 next_state <= DONE;
-            end if;
+            
+            when others =>
+                next_state <= WAIT_MEM;
+            
+            end case;
 
         when GET_RC =>
             if (curr_address = "0000000000000000") then
