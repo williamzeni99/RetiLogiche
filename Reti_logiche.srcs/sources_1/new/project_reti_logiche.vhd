@@ -196,9 +196,6 @@ begin
                
                 when GET_PIXEL =>
                     next_state <= CALC_NEWPIXEL;
-               
-                when CALC_NEWPIXEL =>
-                    next_state <= CALC_NEWPIXEL;
                 
                 when WRITE_PIXEL =>
                     next_state <= DONE;
@@ -272,27 +269,21 @@ begin
                 next_state      <= GET_PIXEL;
             end if;
 
-          when GET_PIXEL =>
+         when GET_PIXEL =>
             o_address_next  <= curr_address;
             m_cp            <= 0;
             i_cp            <= 0;
             next_state      <= WAIT_MEM;
 
          when CALC_NEWPIXEL => 
-            if (i=0) then
-                new_pixel_cp <= i_data-min_pixel_value;
-                i_cp <= i+1;
-                next_state <= WAIT_MEM;
-            elsif (i>0) then 
-                pixel_to_shift:= "00000000" & new_pixel;
-                pixel_to_shift:= std_logic_vector(shift_left(unsigned(pixel_to_shift),shift_level));
-                if (conv_integer(pixel_to_shift)>=255) then
-                    new_pixel_cp <= "11111111";
-                else
-                    new_pixel_cp <= pixel_to_shift(7 downto 0);                 
-                end if;
-                next_state <= ABILIT_WRITE;     
-            end if;           
+            pixel_to_shift:= "00000000" & (i_data-min_pixel_value);
+            pixel_to_shift:= std_logic_vector(shift_left(unsigned(pixel_to_shift),shift_level));
+            if (conv_integer(pixel_to_shift)>=255) then
+                new_pixel_cp <= "11111111";
+            else
+                new_pixel_cp <= pixel_to_shift(7 downto 0);                 
+            end if;
+            next_state <= ABILIT_WRITE;               
             
          when WRITE_PIXEL =>
             o_address_next   <= write_address;
