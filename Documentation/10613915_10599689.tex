@@ -23,6 +23,32 @@
 \usetikzlibrary{shapes.geometric, arrows}
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 
+%for code
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=VHDL,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3,
+  backgroundcolor=\color{white}
+}
+
 \title{Progetto di Reti Logiche}
 \author{
   William Zeni\\
@@ -98,8 +124,9 @@ Il risultato sarà una memoria complessivamente lunga $2 \cdot N_{col} \cdot N_{
 La memoria dialogherà in stretto contatto con il componente attraverso due segnali, che determineranno l'avvio della computazione, la sua terminazione e l'eventuale ripartenza. Si noti che la computazione di un immagine, una volta iniziata, non potrà mai essere interrotta, ma rimane possibile la computazione di più immagini.\\
 \\
 Ogni pixel avrà un valore compreso tra $0$ e $255$ e verrà rielaborato dal componente nel seguente modo:\\
+\\
 
-\noindent\fbox{%
+\noindent\fbox{
 \begin{varwidth}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
 
 \begin{algorithmic}[1]
@@ -114,20 +141,49 @@ Ogni pixel avrà un valore compreso tra $0$ e $255$ e verrà rielaborato dal com
   \EndIf
 \end{algorithmic}
 
-\end{varwidth}%
+\end{varwidth}
 }
 \\
-dove \texttt{max\_pixel\_value} e \texttt{min\_pixel\_value} sono rispettivamente il valore massimo e il valore minimo trova 
-
+\\
+\\
+dove \texttt{max\_pixel\_value} e \texttt{min\_pixel\_value} sono rispettivamente il valore massimo e il valore minimo del pixel trovati all'interno dell'immagine, \texttt{curr\_pixel\_value} è il valore del pixel preso in considerazione e \texttt{new\_pixel} è il valore del pixel da scrivere in memoria.
+\pagebreak
 
 
 
 \subsection{Interfaccia del componente}
-Write somenthing here
+\begin{lstlisting}
+entity project_reti_logiche is
+port (
+    i_clk       : in std_logic;
+    i_rst       : in std_logic;
+    i_start     : in std_logic;
+    i_data      : in std_logic_vector(7 downto 0);
+    o_address   : out std_logic_vector(15 downto 0);
+    o_done      : out std_logic;
+    o_en        : out std_logic;
+    o_we        : out std_logic;
+    o_data      : out std_logic_vector (7 downto 0)
+);
+end project_reti_logiche;
+\end{lstlisting}
+L'interfaccia del componente, per potersi relazionare con la memoria, deve essere come quella sopra riportata. I segnali di input vengono evidenziati dal prefisso \texttt{\lq i\_'}, mentre per i segnali di output è presente il prefisso \texttt{\lq o\_'}. Nel dettaglio:
+\begin{itemize}
+  \item \textbf{i\_clk} scandisce il ciclo di clock della memoria, registrando $1$ sul \texttt{rising\_edge}.
+  \item \textbf{i\_rst}
+  \item \textbf{i\_start}
+  \item \textbf{i\_data}
+  \item \textbf{o\_address}
+  \item \textbf{o\_done}
+  \item \textbf{o\_en}
+  \item \textbf{o\_we}
+  \item \textbf{o\_data}
+\end{itemize}
 
 \subsection{Dati e Descrizione memoria}
 Write somenthing here
 
+\pagebreak
 \section{Desing Pattern}
 \subsection{Scelte Progettuali}
 La struttura del progetto è stata suddivisa in due process principali: \texttt{UPDATE} e \texttt{STATES}.
