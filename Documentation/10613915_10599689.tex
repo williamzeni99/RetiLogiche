@@ -169,15 +169,15 @@ end project_reti_logiche;
 \end{lstlisting}
 L'interfaccia del componente, per potersi relazionare con la memoria, deve essere come quella sopra riportata. I segnali di input vengono evidenziati dal prefisso \texttt{\lq i\_'}, mentre per i segnali di output è presente il prefisso \texttt{\lq o\_'}. Nel dettaglio:
 \begin{itemize}
-  \item \textbf{i\_clk} scandisce il ciclo di clock della memoria, registrando $1$ sul \texttt{rising\_edge}.
-  \item \textbf{i\_rst}
-  \item \textbf{i\_start}
-  \item \textbf{i\_data}
-  \item \textbf{o\_address}
-  \item \textbf{o\_done}
-  \item \textbf{o\_en}
-  \item \textbf{o\_we}
-  \item \textbf{o\_data}
+  \item \textbf{i\_clk} scandisce il ciclo di clock della memoria, registrando \lq$1$' sul \texttt{rising\_edge}.
+  \item \textbf{i\_rst} è il segnale di \texttt{RESET}, viene chiamato all'inizio della computazione di una o più immagini. Se si registra \lq$1$' su questo segnale la computazione deve essere terminata e ripristinata al momento di partenza.
+  \item \textbf{i\_start} determina l'inizio della coputazione. Questo segnale rimane alto fino a quando la computazione non termina. La computazione può iniziare solo se il segnale è basso.
+  \item \textbf{i\_data} raccoglie i dati inviati dalla memoria.
+  \item \textbf{o\_address} è il segnale attraverso il quale facciamo richieste alla memoria. Sostanzialmente su questo segnale poniamo l'indirizzo della memoria che vogliamo leggere o scrivere.
+  \item \textbf{o\_done} determina la fine della computazione. Il segnale deve essere portato alto quando si vuole terminare la computazione e deve rimanere alto fino a quando la memoria non porti il segnale di \texttt{START} basso. Solo in quel caso il segnale viene riportato basso.
+  \item \textbf{o\_en} abilita la memoria alla lettura o alla scrittura.
+  \item \textbf{o\_we}  abilita la memoria alla scrittura. Quando questo segnale è alto la memoria si aspetta un dato in ingresso da scrivere.
+  \item \textbf{o\_data} è il dato che la memoria si aspetta di leggere quando la scrittura è attiva.
 \end{itemize}
 
 \subsection{Dati e Descrizione memoria}
