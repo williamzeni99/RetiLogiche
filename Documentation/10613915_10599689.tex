@@ -20,8 +20,16 @@
 \usepackage{algpseudocode}
 \usepackage{mathtools}
 \usepackage{varwidth}
-\usetikzlibrary{shapes.geometric, arrows}
+\usetikzlibrary{automata, positioning, decorations.text, topaths, arrows.meta, decorations.pathmorphing, quotes, shapes.geometric, arrows}
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+
+\tikzset{
+->, % makes the edges directed
+%>=stealth’, % makes the arrow heads bold
+node distance=1cm, % specifies the minimum distance between two nodes. Change if necessary.
+every state/.style={thick, fill=gray!10}, % sets the properties for each ’state’ node
+initial text=$ $, % sets the text that appears on the start arrow
+}
 
 %for code
 \usepackage{listings}
@@ -121,7 +129,7 @@ Il risultato sarà una memoria complessivamente lunga $2 \cdot N_{col} \cdot N_{
 \fill[text=black] (11.5,0.5) node{\dots};
 \end{tikzpicture}
 \\
-La memoria dialogherà in stretto contatto con il componente attraverso due segnali, che determineranno l'avvio della computazione, la sua terminazione e l'eventuale ripartenza. Si noti che la computazione di un immagine, una volta iniziata, non potrà mai essere interrotta, ma rimane possibile la computazione di più immagini.\\
+La memoria dialogherà in stretto contatto con il componente attraverso due segnali, che determineranno l'avvio della computazione, la sua terminazione e l'eventuale ripartenza. Si noti che la computazione di una singola immagine, una volta iniziata, non potrà mai essere interrotta, ma rimane possibile la computazione di più immagini.\\
 \\
 Ogni pixel avrà un valore compreso tra $0$ e $255$ e verrà rielaborato dal componente nel seguente modo:\\
 \\
@@ -149,8 +157,6 @@ Ogni pixel avrà un valore compreso tra $0$ e $255$ e verrà rielaborato dal com
 dove \texttt{max\_pixel\_value} e \texttt{min\_pixel\_value} sono rispettivamente il valore massimo e il valore minimo del pixel trovati all'interno dell'immagine, \texttt{curr\_pixel\_value} è il valore del pixel preso in considerazione e \texttt{new\_pixel} è il valore del pixel da scrivere in memoria.
 \pagebreak
 
-
-
 \subsection{Interfaccia del componente}
 \begin{lstlisting}
 entity project_reti_logiche is
@@ -173,13 +179,13 @@ L'interfaccia del componente, per potersi relazionare con la memoria, deve esser
   \item \textbf{i\_rst} è il segnale di \texttt{RESET}, viene chiamato all'inizio della computazione di una o più immagini. Se si registra \lq$1$' su questo segnale la computazione deve essere terminata e ripristinata al momento di partenza.
   \item \textbf{i\_start} determina l'inizio della coputazione. Questo segnale rimane alto fino a quando la computazione non termina. La computazione può iniziare solo se il segnale è basso.
   \item \textbf{i\_data} raccoglie i dati inviati dalla memoria.
-  \item \textbf{o\_address} è il segnale attraverso il quale facciamo richieste alla memoria. Sostanzialmente su questo segnale poniamo l'indirizzo della memoria che vogliamo leggere o scrivere.
+  \item \textbf{o\_address} è il segnale attraverso il quale facciamo richieste alla memoria. Sostanzialmente su questo segnale si pone l'indirizzo della memoria che si vuuole leggere o sulla quale si vuole scrivere.
   \item \textbf{o\_done} determina la fine della computazione. Il segnale deve essere portato alto quando si vuole terminare la computazione e deve rimanere alto fino a quando la memoria non porti il segnale di \texttt{START} basso. Solo in quel caso il segnale viene riportato basso.
   \item \textbf{o\_en} abilita la memoria alla lettura o alla scrittura.
   \item \textbf{o\_we}  abilita la memoria alla scrittura. Quando questo segnale è alto la memoria si aspetta un dato in ingresso da scrivere.
   \item \textbf{o\_data} è il dato che la memoria si aspetta di leggere quando la scrittura è attiva.
 \end{itemize}
-
+\pagebreak
 \subsection{Dati e Descrizione memoria}
 Write somenthing here
 
@@ -187,35 +193,42 @@ Write somenthing here
 \section{Desing Pattern}
 \subsection{Scelte Progettuali}
 La struttura del progetto è stata suddivisa in due process principali: \texttt{UPDATE} e \texttt{STATES}.
-Il primo ha il compito di relazionarsi con la memoria e il secondo contiene gli stati della macchina impiegati nella equalizzazione delle immagini. In questo modo una porzione di codice è adibita esclusivamente alla computazione dei pixel (process \texttt{STATES}), mentre la rimanente si occupa dei segnali di output della \textit{entity} (process \texttt{UPDATE}).
+Il primo ha il compito di relazionarsi con la memoria e il secondo contiene gli stati della macchina impiegati nella equalizzazione delle immagini. In questo modo una porzione di codice è adibita esclusivamente alla computazione dei pixel (process \texttt{STATES}), mentre la rimanente si occupa dei segnali di output della \textit{entity} (process \texttt{UPDATE}).\\
 Per permette un corretto dialogo tra i due process è nata l'esigenza di avere dei segnali ``duplicati".
 I segnali con suffisso \texttt{\lq\_cp'} sono stati introdotti per mantere in memoria i valori computati, mentre i segnali con suffisso \texttt{\lq\_next'} sono stati implementati allo scopo di permettere agli stati di far richieste alla memoria.
-Nel particolare, per ogni ciclo di clock, durante \textit{rising\_edge}, il process \texttt{UPDATE} si risveglia, aggiornando i segnali. I segnali contenenti i valori da mantenere vengono reimpostati con i segnali \texttt{\lq\_cp'}, mentre i segnali di output della \textit{entity} sono aggiornati con i segnali \texttt{\lq\_next'}.
+Nel particolare, per ogni ciclo di clock, durante il \textit{rising\_edge}, il process \texttt{UPDATE} si risveglia, aggiornando i segnali. I segnali contenenti i valori da mantenere vengono reimpostati con i segnali \texttt{\lq\_cp'}, mentre i segnali di output della \textit{entity} sono aggiornati con i segnali \texttt{\lq\_next'}.
 
+Il succo della computazione è trattunuto dal process \texttt{STATES}, che è a tutti gli effetti un \texttt{FSA} (\textit{Macchina a Stati Finiti}) rappresentabile attraverso lo schema al paragrafo $2.3$.
 
 \subsection{Elenco Stati}
 
 \subsubsection{START}
-Lo stato di \texttt{START} è stato pensato come stato di attesa iniziale. Questo stato viene invocato in due situazioni differenti: se il segnale di \texttt{i\_rst} viene portato alto, oppure quando il segnale \texttt{i\_start} viene riportato basso dopo la computazione di un immagine. Lo stato \texttt{START} non cambia fino a quando il segnale \texttt{i\_start} non viene portato alto. In quel momento lo stato successivo viene impostato \texttt{INIT}.
+Lo stato di \texttt{START} è il primo stato del process \texttt{STATES} ed è stato pensato come stato di attesa iniziale. Questo stato viene invocato in due situazioni differenti: se il segnale di \texttt{i\_rst} viene portato alto, oppure quando il segnale \texttt{i\_start} viene riportato basso dopo la computazione di un immagine. Lo stato \texttt{START} non cambia fino a quando il segnale \texttt{i\_start} non viene portato alto. In quel momento lo stato successivo viene impostato \texttt{INIT}.
 
 \subsubsection{INIT}
-Lo stato \texttt{INIT} è uno stato di transizione nel quale il processore si assicura che i segnali siano inizializzati con i valori opportuni. Successivamente imposta lo stato prossimo a \texttt{ABILIT\_READ}.
+\texttt{INIT} è uno stato di transizione nel quale il processore si assicura che i segnali siano inizializzati con i valori opportuni. Successivamente imposta lo stato prossimo a \texttt{ABILIT\_READ}.
 
 \subsubsection{ABILIT\_READ}
-Lo stato \texttt{ABILIT\_READ} è lo stato attraverso il quale abilitiamo la memoria alla sola lettura. Viene richiamato in momenti diversi del progetto e, in base allo stato chiamante, instrada lo stato prossimo a quello opportuno.
+Attraverso \texttt{ABILIT\_READ} si abilita la memoria alla sola lettura. Viene richiamato in due momenti diversi del progetto: all'inizio della computazione, subito dopo \texttt{INIT}, per portare il segnale \texttt{o\_en} a $1$ e permettere agli altri stati di poter leggere dalla memoria, oppure dopo la scrittura di un pixel, al fine di disabilitare l'accesso alla scrittura. In base allo stato chiamante, instrada lo stato prossimo a quello opportuno.
 
 \subsubsection{ABILIT\_WRITE}
 Lo stato \texttt{ABILIT\_WRITE} abilita la memoria alla scrittura. Viene invocato subito dopo aver computato il valore del nuovo pixel e in nessun altro momento. Instrada poi lo stato prossimo a \texttt{WRITE\_PIXEL}.
 
+\pagebreak
 \subsubsection{WAIT\_MEM}
-Lo stato \texttt{WAIT\_MEM} è uno stato centrale durante la gestione del flusso di dati. Sostanzialmente ``spreca" un ciclo di clock. Questo ci assicura sia in caso di scrittura, sia in caso di lettura, che i segnali in ingresso e in uscita siano letti o scritti correttamente. Nel caso specifico alla quale ci rifacciamo, alcune chiamate a questo stato potevano essere evitate. Questa informazione è emersa durante lo stress test a cui il processore è stato sottoposto. Tuttavia, si è preferito lasciarle per mantenere la stuttura del processore. Ciò dovrebbe permette una maggior robustezza, sebbene un aumento nella latenza della computazione.
+\texttt{WAIT\_MEM} è uno stato centrale durante la gestione del flusso di dati. La sua funzione è quella di far ``sprecare" un ciclo di clock al processore. Ciò ci assicura sia in caso di scrittura, sia in caso di lettura, che i segnali in ingresso e in uscita siano letti o scritti correttamente. Nello specifico, questo stato evita che lo stato successivo lavori con dati relativi allo stato precedente.\\
+
+\textbf{N.B:} \textit{Alcune chiamate a questo stato potevano essere evitate. Questa informazione è emersa durante lo stress test a cui il processore è stato sottoposto. Tuttavia, è stato scelto di forzare ugualmente l’attesa per ovviare eventuali errori e per permettere la corretta acquisizione dei dati indipendentemente dal periodo di clock scelto. Ciò dovrebbe permettere una maggior robustezza, sebbene un aumento nella latenza della computazione.}
 
 \subsubsection{GET\_RC}
-Lo stato \texttt{GET\_RC} è uno stato in preparazione al calcolo della dimensione dell'immagine e dei punti in cui bisognerà scrivere all'interno della memoria. Lo stato \texttt{GET\_RC} viene invocato dopo l'abilitazione della memoria alla lettura. Questo stato si occupa del recuperare i valori dalla memoria e aggiornare i segnali \texttt{n\_col} e \texttt{n\_row}.
+\texttt{GET\_RC} si occupa della lettura dei primi due pixel della memoria in cui sono contenute le dimensioni dell’immagine da modificare. Viene invocato dopo l'abilitazione della memoria alla lettura e aggiorna i segnali \texttt{n\_col} e \texttt{n\_row}. Lo stato richiama se stesso fino a quando non ha aggiornato i due segnali, altrimenti imposta lo stato prossimo a \texttt{GET\_DIM}.
 
 \subsubsection{GET\_DIM}
-Lo stato \texttt{GET\_DIM} è lo stato che si preoccupa di aggiornare il segnale \texttt{dim\_address} con il valore opportuno. Il calcolo $n\_col \cdot n\_row + 2$ aggiorna il segnale al primo bit libero per la scrittura.
+Lo stato \texttt{GET\_DIM} si preoccupa di aggiornare il segnale \texttt{dim\_address} con l'indirizzo del primo bit libero per la scrittura. Il calcolo che ne determina il valore è: $n\_col \cdot n\_row + 2$.\\
 
+\textbf{N.B:}\textit{
+Se si usasse segnali \textit{std\_logic\_vector} da $8$ bit, la moltiplicazione produrrebbe un risultato su $16$ bit, che dovrebbe poi essere riportato a $8$ bit per il proseguimento della computazione. Pertanto, si lascia al linguaggio VHDL gestire il tutto usando segnali di tipo intero (\texttt{n\_col}, \texttt{n\_row} e \texttt{dim\_address}).
+}
 
 \subsubsection{READ\_PIXEL}
 Lo stato \texttt{READ\_PIXEL} è uno stato strettamente accopiato con lo stato \texttt{GET\_MINMAX}. Richiede alla memoria il valore del pixel e aggiorna il segnale \texttt{curr\_address} a quello successivo. In questo modo il valore del pixel sarà disponibile sul segnale \texttt{i\_data} al \textit{rising\_edge} successivo.
@@ -243,6 +256,64 @@ Write somenthing here
 
 \subsubsection{WAITINGPIC}
 Write somenthing here
+
+\pagebreak
+
+\subsection{Schema process STATES}
+%FSA
+\vspace{0.5 cm}
+\begin{center}
+\resizebox{!}{24cm}{
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2cm,
+        scale = 1,transform shape, on grid]
+
+  \node[state] (start) [scale=1] {$START$};
+  \node[state] (init) [below=of start, scale=1]  {$INIT$};
+  \node[state] (abilitread) [below= of init, scale=0.5]  {$ABILIT\_READ$};
+  \node[state] (getrc) [below=of abilitread, scale=0.6]  {$GET\_RC$};
+  \node[state] (getdim) [below=of getrc, scale=0.6]  {$GET\_DIM$};
+  \node[state] (readpixel) [below=of getdim, scale=0.5]  {$READ\_PIXEL$};
+  \node[state] (getdelta) [below =of readpixel, scale=0.5] {$GET\_DELTA$};
+  \node[state] (calcshift) [below=of getdelta, scale=0.5]  {$CALC\_SHIFT$};
+  \node[state] (getpixel) [below=of calcshift, scale=0.5 ]  {$GET\_PIXEL$};
+  \node[state] (calcnewpixel) [below=of getpixel, scale=0.5]  {$CALC\_NEWPIXEL$};
+  \node[state] (abilitwrite) [below=of calcnewpixel, scale=0.5, yshift=-1cm]  {$ABILIT\_WRITE$};
+  \node[state] (writepixel) [below=of abilitwrite, scale=0.5, yshift=-1cm]  {$WRITE\_PIXEL$};
+  \node[state] (done) [below=of writepixel, scale=0.7]  {$DONE$};
+  \node[state] (waitingpic) [below=of done, scale=0.5]  {$WAITINGPIC$};
+  \node[state] (waitmem) [right=of calcshift, xshift=4cm, scale=1]  {$WAIT\_MEM$};
+
+  \draw (start) edge node{} (init)
+        (init) edge node{} (abilitread)
+        (abilitread) edge node{} (getrc)
+        (getrc) edge node{} (waitmem)
+        (waitmem) edge node{} (getrc)
+        (getdim) edge node{} (waitmem)
+        (waitmem) edge node{} (getdim)
+        (readpixel) edge node{} (waitmem)
+        (readpixel) edge node{} (getdelta)
+        (waitmem) edge node{} (readpixel)
+        (getdelta) edge node{} (waitmem)
+        (waitmem) edge node{} (calcshift)
+        (calcshift) edge node{} (waitmem)
+        (calcshift) edge node{} (getpixel)
+        (getpixel) edge node{} (waitmem)
+        (waitmem) edge node{} (calcnewpixel)
+        (calcnewpixel) edge node{} (abilitwrite)
+        (abilitwrite) edge node{} (writepixel)
+        (writepixel) edge node{} (waitmem)
+        (writepixel) edge[bend left] node{} (abilitread)
+        (waitmem) edge node{} (done)
+        (readpixel) edge node{} (waitmem)
+        (done) edge node{} (waitingpic)
+        (waitingpic) edge[bend left, above] node{} (start)
+        ;
+\end{tikzpicture}
+}
+\end{center}
+
+\pagebreak
+
 
 \section{Risultati dei Test}
 Write somenthing here!

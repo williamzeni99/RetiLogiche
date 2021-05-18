@@ -58,7 +58,7 @@ architecture Behavioral of project_reti_logiche is
     signal o_data_next:     std_logic_vector(7 downto 0)  := (others => '0');
 
 begin
-  process(i_clk,i_rst)
+  UPDATE: process(i_clk,i_rst)
     begin
       if (i_rst='1') then
         max_pixel_value   <= (others => '0');
@@ -102,7 +102,7 @@ begin
       end if;
   end process;
 
-  process(curr_address,i_start, i_data, n_col, n_row,
+  STATES: process(curr_address,i_start, i_data, n_col, n_row,
           curr_state,prev_state, dim_address, shift_level,
           new_pixel, max_pixel_value, min_pixel_value,
           delta_value, shift_level, write_address,
@@ -220,7 +220,7 @@ begin
                 next_state <= DONE;
             else
                 dim_address_cp  <= n_col*n_row+2;
-                next_state      <= ABILIT_READ;
+                next_state      <= ABILIT_READ; --no è WAIT_MEM figa
             end if;
 
         when READ_PIXEL =>
