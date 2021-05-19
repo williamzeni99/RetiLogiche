@@ -273,16 +273,20 @@ Sostanzialmente attraverso il ciclo \texttt{WHILE} si ricava \textit{k}, il qual
 \texttt{GET\_PIXEL} è uno stato omonimo di \texttt{READ\_PIXEL}. La principale differenza del primo con il secondo è che mentre \texttt{READ\_PIXEL} effettua dei controlli sul flusso della computazione, \texttt{GET\_PIXEL} richiede solamente alla memoria il dato da leggere e imposta lo stato prossimo a \texttt{WAIT\_MEM}.
 
 \subsubsection{CALC\_NEWPIXEL}
-Write somenthing here
+In \texttt{CALC\_NEWPIXEL} si calcola il nuovo valore del pixel da scrive in memoria.
+Per farlo, viene utilizzata una variabile di appoggio \texttt{pixel\_to\_shift} definita come uno \textit{std\_logic\_vector} da $16$ \textit{bit} e inizializzata come $\texttt{i\_data}-\texttt{min\_pixel\_value}$ con l’aggiunta di otto `$0$' in posizione più significativa.
+La variabile viene, quindi, shiftata e su di essa viene fatto il seguente controllo: se risulta essere minore di $255$ allora aggiorniamo il segnale \texttt{new\_pixel} al suo valore in \textit{std\_logic\_vector} su $8$\textit{bit}, altrimenti il segnale \texttt{new\_pixel} viene impostato a $255$ sempre in \textit{std\_logic\_vector} su $8$ \textit{bit}.
 
 \subsubsection{WRITE\_PIXEL}
-Write somenthing here.
+Lo stato \texttt{WRITE\_PIXEL} si assicura che il valore del nuovo pixel calcolato sia scritto in memoria, incrementa tutti i contatori e controlla di non essere arrivato al termine della computazione. Il controllo usufruisce della varibile intera \texttt{last}, che assume il valore di $2*\texttt{n\_col}*\texttt{n\_row}+2$, ovvero l'indice dell'ultimo pixel scrivibile. Quando il contatore assume questo valore lo stato successivo viene impostato a \texttt{DONE} (sempre attravero \texttt{WAIT\_MEM}), altrimenti viene impostato lo stato prossimo a \texttt{ABILIT\_READ}, dove la scrittura viene disabilitata e viene riabilitata la lettura per il pixel successivo.
 
 \subsubsection{DONE}
-Write somenthing here
+\texttt{DONE} chiude tutte le comunicazioni con la memoria, riportando a `$0$' sia \texttt{o\_en} che \texttt{o\_we} e pulendo il buffer di \texttt{o\_address} e \texttt{o\_data}.
+Successivamente il segnale \texttt{o\_done} viene portato ad `$1$' e lo stato prossimo è impostato a \texttt{ WAITING\_PIC}.
+
 
 \subsubsection{WAITINGPIC}
-Write somenthing here
+Ultimo stato del processo. Ha lo scopo di restare in attesa che il segnale di \texttt{o\_done} venga riportato a `$0$'. Finche ciò non avviene, \texttt{ WAITING\_PIC} richiama se stesso. Quando sia \texttt{i\_start} che \texttt{o\_done} hanno il segnale a `$0$', imposta lo stato prossimo a \texttt{START} facendo ricominciare l’intera compilazione.
 
 \pagebreak
 
