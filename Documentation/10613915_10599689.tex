@@ -234,7 +234,7 @@ La moltiplicazione usa segnali \textit{std\_logic\_vector} da $8$ bit e produce 
 }
 
 \subsubsection{READ\_PIXEL}
-\texttt{READ\_PIXEL} è uno stato strettamente connesso con lo stato \texttt{GET\_MINMAX}. Richiede alla memoria il valore del pixel da leggere e aggiorna il segnale \texttt{curr\_address} a quello successivo. In questo modo il valore del pixel sarà disponibile sul segnale \texttt{i\_data} dopo due \textit{rising\_edge} successivi. L'attesa è sempre lasciata allo stato \texttt{WAIT\_MEM}
+\texttt{READ\_PIXEL} è uno stato strettamente connesso con lo stato \texttt{GET\_MINMAX}. Richiede alla memoria il valore del pixel da leggere e aggiorna il segnale \texttt{curr\_address} a quello successivo. In questo modo il valore del pixel sarà disponibile sul segnale \texttt{i\_data} dopo due \textit{rising\_edge} successivi. L'attesa è sempre lasciata allo stato \texttt{WAIT\_MEM}.
 
 \subsubsection{GET\_MINMAX}
 \texttt{GET\_MINMAX} aggiorna i segnali \texttt{max\_pixel\_value} e \texttt{min\_pixel\_value}, inizializzati rispettivamente con $0$ e $255$, con il valore di \texttt{i\_data}. Questo avviene se e solo se si verifica che \texttt{i\_data} è \textit{maggiore} di \texttt{max\_pixel\_value} (in questo caso aggiorna \texttt{max\_pixel\_value}) oppure se \texttt{i\_data} è \textit{minore} di \texttt{min\_pixel\_value} (in questo caso aggiorna \texttt{min\_pixel\_value}). Imposta lo stato prossimo a \texttt{READ\_PIXEL}
