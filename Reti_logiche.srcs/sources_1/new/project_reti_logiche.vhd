@@ -285,7 +285,7 @@ begin
             write_address_cp <= write_address+1;
             curr_address_cp  <= curr_address+1;
             last             := 2*(conv_integer(n_col)*conv_integer(n_row))+2;
-            if (conv_integer(write_address)+1 = last) then --cambiato con dimaddress
+            if (conv_integer(write_address)+1 = last) then
                 next_state <= WAIT_MEM;
             else
                 next_state <= ABILIT_READ;
