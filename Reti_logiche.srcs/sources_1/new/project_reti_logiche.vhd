@@ -66,10 +66,10 @@ begin
         delta_value       <= (others => '0');
         new_pixel         <= (others => '0');
         write_address     <= (others => '0');
-        curr_state        <= START;
         dim_address       <= (others => '0');
         n_col             <= (others => '0');
         n_row             <= (others => '0');
+        curr_state        <= START;
         shift_level       <= 0;
         m                 <= 0;
         k                 <= 0;
@@ -156,7 +156,7 @@ begin
         when ABILIT_READ =>
             o_en_next  <= '1';
             o_we_next  <= '0';
-            
+
             if (prev_state = INIT) then
                next_state <= GET_RC;
             else
@@ -177,10 +177,10 @@ begin
                     else
                         next_state <= GET_RC;
                     end if;
-                
+
                 when GET_DIM =>
                     next_state <= READ_PIXEL;
-                    
+
                 when GET_DELTA =>
                     next_state <= CALC_SHIFT;
 
@@ -267,8 +267,8 @@ begin
 
          when GET_PIXEL =>
             o_address_next  <= curr_address;
-            m_cp            <= 0;
-            i_cp            <= 0;
+          --  m_cp            <= 0;
+          --  i_cp            <= 0;
             next_state      <= WAIT_MEM;
 
          when CALC_NEWPIXEL =>
@@ -284,11 +284,10 @@ begin
          when WRITE_PIXEL =>
             o_address_next   <= write_address;
             o_data_next      <= new_pixel;
-            dim_address_cp   <= dim_address+1;
             write_address_cp <= write_address+1;
             curr_address_cp  <= curr_address+1;
             last             := 2*(conv_integer(n_col)*conv_integer(n_row))+2;
-            if (conv_integer(dim_address)+1 = last) then
+            if (conv_integer(write_address)+1 = last) then --cambiato con dimaddress
                 next_state <= WAIT_MEM;
             else
                 next_state <= ABILIT_READ;

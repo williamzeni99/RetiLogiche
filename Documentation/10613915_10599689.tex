@@ -9,6 +9,7 @@
 \usepackage[a4paper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
 
 % Useful packages
+\usepackage{float}
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{graphicx}
@@ -199,6 +200,7 @@ I segnali con suffisso \texttt{\lq\_cp'} sono stati introdotti per mantere in me
 Nel particolare, per ogni ciclo di clock, durante il \textit{rising\_edge}, il process \texttt{UPDATE} si risveglia, aggiornando i segnali. I segnali contenenti i valori da mantenere vengono reimpostati con i segnali \texttt{\lq\_cp'}, mentre i segnali di output della \textit{entity} sono aggiornati con i segnali \texttt{\lq\_next'}.
 
 Il succo della computazione è trattunuto dal process \texttt{STATES}, che è a tutti gli effetti un \texttt{FSA} (\textit{Macchina a Stati Finiti}) rappresentabile attraverso lo schema al paragrafo $2.3$.
+Il suo funzionamento è permesso sostanzialmente da tre segnali a lui dedicati: \texttt{next\_state}, che identifica la chiamata allo stato prossimo,  \texttt{curr\_state}, che rileva lo stato corrente, e \texttt{prev\_state}, che conserva lo stato precedente.
 
 \subsection{Elenco Stati}
 
@@ -216,7 +218,7 @@ Lo stato \texttt{ABILIT\_WRITE} abilita la memoria alla scrittura. Viene invocat
 
 \pagebreak
 \subsubsection{WAIT\_MEM}
-\texttt{WAIT\_MEM} è uno stato centrale durante la gestione del flusso di dati. La sua funzione è quella di far ``sprecare" un ciclo di clock al processore. Ciò ci assicura sia in caso di scrittura, sia in caso di lettura, che i segnali in ingresso e in uscita siano letti o scritti correttamente. Nello specifico, questo stato evita che lo stato successivo lavori con dati relativi allo stato precedente.\\
+\texttt{WAIT\_MEM} è uno stato centrale durante la gestione del flusso di dati. La sua funzione è quella di far ``sprecare" un ciclo di clock al processore. Ciò ci assicura sia in caso di scrittura, sia in caso di lettura, che i segnali in ingresso e in uscita siano letti o scritti correttamente. Nello specifico, questo stato evita che lo stato successivo lavori con dati relativi allo stato precedente. In base allo stato chiamante instrada lo stato prossimo in modo opportuno.\\
 
 \textbf{N.B:} \textit{Alcune chiamate a questo stato potevano essere evitate. Questa informazione è emersa durante lo stress test a cui il processore è stato sottoposto. Tuttavia, è stato scelto di forzare ugualmente l’attesa per ovviare eventuali errori e per permettere la corretta acquisizione dei dati indipendentemente dal periodo di clock scelto. Ciò dovrebbe permettere una maggior robustezza, sebbene un aumento nella latenza della computazione.}
 
@@ -225,25 +227,50 @@ Lo stato \texttt{ABILIT\_WRITE} abilita la memoria alla scrittura. Viene invocat
 
 \subsubsection{GET\_DIM}
 Lo stato \texttt{GET\_DIM} si preoccupa di aggiornare il segnale \texttt{dim\_address} con l'indirizzo del primo bit libero per la scrittura. Il calcolo che ne determina il valore è: $n\_col \cdot n\_row + 2$.\\
+\texttt{GET\_DIM} verifica inoltre il caso speciale in cui una delle dimensioni dovesse essere nulla. In quel caso impone lo stato prossimo a \texttt{DONE}.\\
 
 \textbf{N.B:}\textit{
-Se si usasse segnali \textit{std\_logic\_vector} da $8$ bit, la moltiplicazione produrrebbe un risultato su $16$ bit, che dovrebbe poi essere riportato a $8$ bit per il proseguimento della computazione. Pertanto, si lascia al linguaggio VHDL gestire il tutto usando segnali di tipo intero (\texttt{n\_col}, \texttt{n\_row} e \texttt{dim\_address}).
+La moltiplicazione usa segnali \textit{std\_logic\_vector} da $8$ bit e produce un risultato su $16$ bit. Essendo \texttt{dim\_address} un \textit{std\_logic\_vector} su $16$ bit, il problema non si pone.
 }
 
 \subsubsection{READ\_PIXEL}
-\texttt{READ\_PIXEL} è uno stato strettamente connesso con lo stato \texttt{GET\_MINMAX}. Richiede alla memoria il valore del pixel da leggere e aggiorna il segnale \texttt{curr\_address} a quello successivo. In questo modo il valore del pixel sarà disponibile sul segnale \texttt{i\_data} al \textit{rising\_edge} successivo.
+\texttt{READ\_PIXEL} è uno stato strettamente connesso con lo stato \texttt{GET\_MINMAX}. Richiede alla memoria il valore del pixel da leggere e aggiorna il segnale \texttt{curr\_address} a quello successivo. In questo modo il valore del pixel sarà disponibile sul segnale \texttt{i\_data} dopo due \textit{rising\_edge} successivi. L'attesa è sempre lasciata allo stato \texttt{WAIT\_MEM}
 
 \subsubsection{GET\_MINMAX}
-Write somenthing here.
+\texttt{GET\_MINMAX} aggiorna i segnali \texttt{max\_pixel\_value} e \texttt{min\_pixel\_value}, inizializzati rispettivamente con $0$ e $255$, con il valore di \texttt{i\_data}. Questo avviene se e solo se si verifica che \texttt{i\_data} è \textit{maggiore} di \texttt{max\_pixel\_value} (in questo caso aggiorna \texttt{max\_pixel\_value}) oppure se \texttt{i\_data} è \textit{minore} di \texttt{min\_pixel\_value} (in questo caso aggiorna \texttt{min\_pixel\_value}). Imposta lo stato prossimo a \texttt{READ\_PIXEL}
+%non so perche lo mette in viola
 
 \subsubsection{GET\_DELTA}
-Write somenthing here
+\texttt{GET\_DELTA} è uno stato banale. Calcola la \textit{differenza} tra \texttt{max\_pixel\_value} e \texttt{min\_pixel\_value} e imposta lo stato prossimo a \texttt{WAIT\_MEM}.
+
+\pagebreak
 
 \subsubsection{CALC\_SHIFT}
-Write somenthing here
+Lo stato \texttt{CALC\_SHIFT} si preoccupa di effettuare la riga $2$ dello speudo-codice riportato al paragrafo $1.2$.
+Per effettuare il calcolo, richiama se stesso (attraverso lo stato \texttt{WAIT\_MEM}) aggiornando dei segnali d'appoggio. Nel dettaglio si potrebbe semplificare il tutto con il seguente pseudo-codice:
+\\
+\\
+\noindent\fbox{
+\begin{varwidth}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
+\begin{algorithmic}[1]
+  \State $m \gets delta\_value+1$
+  \State $k \gets -1$
+  \State $t \gets 1$
+   \While{$t\leq m$}
+   \State $k \gets k+1$
+       \State $t \gets t*2$
+  \EndWhile
+  \State $shift\_level \gets 8-k$
+\end{algorithmic}
+\end{varwidth}
+}
+\\
+\\
+\\
+Sostanzialmente attraverso il ciclo \texttt{WHILE} si ricava \textit{k}, il quale non è altro che il valore di $\floor{log_2(delta\_value +1)}$. Questa procedura è forse quella più dispendiosa a livello di tempo e memoria, poichè per aggiornare ogni segnale si deve come minimo attendere due cicli di clock. Inoltre, la moltiplicazione tra due interi (\textit{t} e $2$) produce un risultato su $64$ \textit{bit} che VHDL gestisce troncando a $32$ \textit{bit}. Per le specifiche del progetto ci si aspetta che \textit{k} non possa assumere un valore maggiore di $8$, pertando si è certi che una variabile a $32$ \textit{bit} possa largamente contenere i valori desiderati.
 
 \subsubsection{GET\_PIXEL}
-Write somenthing here
+\texttt{GET\_PIXEL} è uno stato omonimo di \texttt{READ\_PIXEL}. La principale differenza del primo con il secondo è che mentre \texttt{READ\_PIXEL} effettua dei controlli sul flusso della computazione, \texttt{GET\_PIXEL} richiede solamente alla memoria il dato da leggere e imposta lo stato prossimo a \texttt{WAIT\_MEM}.
 
 \subsubsection{CALC\_NEWPIXEL}
 Write somenthing here
@@ -305,10 +332,11 @@ Write somenthing here
         (calcnewpixel) edge node{} (abilitwrite)
         (abilitwrite) edge node{} (writepixel)
         (writepixel) edge[bend right, in=-80] node{} (waitmem)
-        (writepixel) edge[bend left] node{} (abilitread)
+        (writepixel) edge[bend left, in=140] node{} (abilitread)
+        (abilitread) edge[bend right] node{} (getpixel)
         (waitmem) edge[bend left, out=100, looseness=2] node{} (done)
         (done) edge node{} (waitingpic)
-        (waitingpic) edge[bend left, above] node{} (start)
+        (waitingpic) edge[bend left] node{} (start)
         ;
 \end{tikzpicture}
 }
