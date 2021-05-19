@@ -31,10 +31,10 @@ architecture Behavioral of project_reti_logiche is
     signal new_pixel:         std_logic_vector(7 downto 0)  := (others => '0');
     signal curr_address:      std_logic_vector(15 downto 0) := (others => '0');
     signal write_address:     std_logic_vector(15 downto 0) := (others => '0');
-    signal dim_address:       integer                       := 0;
+    signal dim_address:       std_logic_vector(15 downto 0) := (others => '0');
+    signal n_col :             std_logic_vector(7 downto 0) := (others => '0');
+    signal n_row :             std_logic_vector(7 downto 0) := (others => '0');
     signal shift_level:       integer                       := 0;
-    signal n_col:             integer                       := 0;
-    signal n_row:             integer                       := 0;
     signal m,k,t,i:           integer                       := 0;
 
     --signal to work with
@@ -44,9 +44,9 @@ architecture Behavioral of project_reti_logiche is
     signal new_pixel_cp:            std_logic_vector(7 downto 0)  := (others => '0');
     signal curr_address_cp:         std_logic_vector(15 downto 0) := (others => '0');
     signal write_address_cp:        std_logic_vector(15 downto 0) := (others => '0');
-    signal dim_address_cp:          integer                       := 0;
-    signal n_col_cp:                integer                       := 0;
-    signal n_row_cp:                integer                       := 0;
+    signal dim_address_cp:         std_logic_vector(15 downto 0) := (others => '0');
+    signal n_col_cp:                 std_logic_vector(7 downto 0) := (others => '0');
+    signal n_row_cp:                 std_logic_vector(7 downto 0) := (others => '0');
     signal shift_level_cp:          integer                       := 0;
     signal m_cp, k_cp, t_cp, i_cp : integer                       := 0;
 
@@ -67,9 +67,9 @@ begin
         new_pixel         <= (others => '0');
         write_address     <= (others => '0');
         curr_state        <= START;
-        dim_address       <= 0;
-        n_col             <= 0;
-        n_row             <= 0;
+        dim_address       <= (others => '0');
+        n_col             <= (others => '0');
+        n_row             <= (others => '0');
         shift_level       <= 0;
         m                 <= 0;
         k                 <= 0;
@@ -141,10 +141,10 @@ begin
             new_pixel_cp        <=  (others => '0');
             curr_address_cp     <=  (others => '0');
             write_address_cp    <=  (others => '0');
-            n_col_cp            <=  0;
-            n_row_cp            <=  0;
+            n_col_cp            <=  (others => '0');
+            n_row_cp            <=  (others => '0');
+            dim_address_cp      <=  (others => '0');
             shift_level_cp      <=  0;
-            dim_address_cp      <=  0;
 
             m_cp  <=  0;
             k_cp  <=  0;
@@ -156,10 +156,9 @@ begin
         when ABILIT_READ =>
             o_en_next  <= '1';
             o_we_next  <= '0';
+            
             if (prev_state = INIT) then
                next_state <= GET_RC;
-            elsif (prev_state =GET_DIM) then
-                next_state <=READ_PIXEL;
             else
                 next_state <= GET_PIXEL;
             end if;
@@ -178,7 +177,10 @@ begin
                     else
                         next_state <= GET_RC;
                     end if;
-
+                
+                when GET_DIM =>
+                    next_state <= READ_PIXEL;
+                    
                 when GET_DELTA =>
                     next_state <= CALC_SHIFT;
 
@@ -205,12 +207,12 @@ begin
                curr_address_cp <= curr_address+1;
                next_state      <= WAIT_MEM;
             elsif (curr_address = "0000000000000001") then
-               n_col_cp         <= conv_integer(i_data);
+               n_col_cp         <= i_data;
                o_address_next   <= curr_address;
                curr_address_cp  <= curr_address+1;
                next_state       <= WAIT_MEM;
             else
-               n_row_cp         <= conv_integer(i_data);
+               n_row_cp         <= i_data;
                curr_address_cp  <= curr_address+1;
                next_state       <= WAIT_MEM;
             end if;
@@ -220,11 +222,11 @@ begin
                 next_state <= DONE;
             else
                 dim_address_cp  <= n_col*n_row+2;
-                next_state      <= ABILIT_READ; --no è WAIT_MEM figa
+                next_state <= WAIT_MEM;
             end if;
 
         when READ_PIXEL =>
-            if (unsigned(curr_address) /= dim_address) then
+            if (curr_address /= dim_address) then
                 o_address_next  <= curr_address;
                 curr_address_cp <= curr_address+1;
                 next_state      <= WAIT_MEM;
@@ -285,8 +287,8 @@ begin
             dim_address_cp   <= dim_address+1;
             write_address_cp <= write_address+1;
             curr_address_cp  <= curr_address+1;
-            last             := 2*(n_col*n_row)+2;
-            if (dim_address+1 = last) then
+            last             := 2*(conv_integer(n_col)*conv_integer(n_row))+2;
+            if (conv_integer(dim_address)+1 = last) then
                 next_state <= WAIT_MEM;
             else
                 next_state <= ABILIT_READ;
