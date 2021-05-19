@@ -231,7 +231,7 @@ Se si usasse segnali \textit{std\_logic\_vector} da $8$ bit, la moltiplicazione 
 }
 
 \subsubsection{READ\_PIXEL}
-Lo stato \texttt{READ\_PIXEL} è uno stato strettamente accopiato con lo stato \texttt{GET\_MINMAX}. Richiede alla memoria il valore del pixel e aggiorna il segnale \texttt{curr\_address} a quello successivo. In questo modo il valore del pixel sarà disponibile sul segnale \texttt{i\_data} al \textit{rising\_edge} successivo.
+\texttt{READ\_PIXEL} è uno stato strettamente connesso con lo stato \texttt{GET\_MINMAX}. Richiede alla memoria il valore del pixel da leggere e aggiorna il segnale \texttt{curr\_address} a quello successivo. In questo modo il valore del pixel sarà disponibile sul segnale \texttt{i\_data} al \textit{rising\_edge} successivo.
 
 \subsubsection{GET\_MINMAX}
 Write somenthing here.
@@ -270,41 +270,43 @@ Write somenthing here
   \node[state] (start) [scale=1] {$START$};
   \node[state] (init) [below=of start, scale=1]  {$INIT$};
   \node[state] (abilitread) [below= of init, scale=0.5]  {$ABILIT\_READ$};
-  \node[state] (getrc) [below=of abilitread, scale=0.6]  {$GET\_RC$};
+  \node[state] (getrc) [below=of abilitread, scale=0.8, yshift=-0.5cm]  {$GET\_RC$};
   \node[state] (getdim) [below=of getrc, scale=0.6]  {$GET\_DIM$};
   \node[state] (readpixel) [below=of getdim, scale=0.5]  {$READ\_PIXEL$};
-  \node[state] (getdelta) [below =of readpixel, scale=0.5] {$GET\_DELTA$};
+  \node[state] (getminmax) [below =of readpixel, scale=0.5] {$GET\_MINMAX$};
+  \node[state] (getdelta) [below =of getminmax, scale=0.5] {$GET\_DELTA$};
   \node[state] (calcshift) [below=of getdelta, scale=0.5]  {$CALC\_SHIFT$};
   \node[state] (getpixel) [below=of calcshift, scale=0.5 ]  {$GET\_PIXEL$};
   \node[state] (calcnewpixel) [below=of getpixel, scale=0.5]  {$CALC\_NEWPIXEL$};
   \node[state] (abilitwrite) [below=of calcnewpixel, scale=0.5, yshift=-1cm]  {$ABILIT\_WRITE$};
   \node[state] (writepixel) [below=of abilitwrite, scale=0.5, yshift=-1cm]  {$WRITE\_PIXEL$};
   \node[state] (done) [below=of writepixel, scale=0.7]  {$DONE$};
-  \node[state] (waitingpic) [below=of done, scale=0.5]  {$WAITINGPIC$};
-  \node[state] (waitmem) [right=of calcshift, xshift=4cm, scale=1]  {$WAIT\_MEM$};
+  \node[state] (waitingpic) [below=of done, scale=0.6]  {$WAITINGPIC$};
+  \node[state] (waitmem) [right=of calcshift, xshift=8cm, scale=1.2]  {$WAIT\_MEM$};
 
   \draw (start) edge node{} (init)
         (init) edge node{} (abilitread)
         (abilitread) edge node{} (getrc)
-        (getrc) edge node{} (waitmem)
-        (waitmem) edge node{} (getrc)
-        (getdim) edge node{} (waitmem)
-        (waitmem) edge node{} (getdim)
-        (readpixel) edge node{} (waitmem)
-        (readpixel) edge node{} (getdelta)
-        (waitmem) edge node{} (readpixel)
-        (getdelta) edge node{} (waitmem)
-        (waitmem) edge node{} (calcshift)
-        (calcshift) edge node{} (waitmem)
+        (getrc) edge[bend left, out=60, in=45, looseness=1] node{} (waitmem)
+        (waitmem) edge[bend right, in=-100, out=200, looseness=2] node{} (getrc)
+        (getdim) edge[bend left, in=120] node{} (waitmem)
+        (waitmem) edge[bend right, out=-70, in=-100] node{} (getdim)
+        (readpixel) edge[bend left, out=50, in=130] node{} (waitmem)
+        (waitmem) edge[bend right, out=-30] node{} (getminmax)
+        (getminmax) edge node{} (readpixel)
+        (readpixel) edge[bend right=90] node{} (getdelta)
+        (waitmem) edge [bend right, out=-30] node{} (readpixel)
+        (getdelta) edge[bend left] node{} (waitmem)
+        (waitmem) edge[bend right=20] node{} (calcshift)
+        (calcshift) edge[bend right=20] node{} (waitmem)
         (calcshift) edge node{} (getpixel)
-        (getpixel) edge node{} (waitmem)
-        (waitmem) edge node{} (calcnewpixel)
+        (getpixel) edge[bend right] node{} (waitmem)
+        (waitmem) edge[bend left, out=70] node{} (calcnewpixel)
         (calcnewpixel) edge node{} (abilitwrite)
         (abilitwrite) edge node{} (writepixel)
-        (writepixel) edge node{} (waitmem)
+        (writepixel) edge[bend right, in=-80] node{} (waitmem)
         (writepixel) edge[bend left] node{} (abilitread)
-        (waitmem) edge node{} (done)
-        (readpixel) edge node{} (waitmem)
+        (waitmem) edge[bend left, out=100, looseness=2] node{} (done)
         (done) edge node{} (waitingpic)
         (waitingpic) edge[bend left, above] node{} (start)
         ;
