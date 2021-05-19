@@ -267,8 +267,6 @@ begin
 
          when GET_PIXEL =>
             o_address_next  <= curr_address;
-          --  m_cp            <= 0;
-          --  i_cp            <= 0;
             next_state      <= WAIT_MEM;
 
          when CALC_NEWPIXEL =>
