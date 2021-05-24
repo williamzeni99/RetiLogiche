@@ -10,17 +10,277 @@
 
 % Useful packages
 \usepackage{float}
-\usepackage{graphicx}
 \usepackage{amsmath}
-\usepackage{graphicx}
-\usepackage[colorlinks=true, allcolors=black]{hyperref}
-\usepackage{makeidx}
+%\usepackage{graphicx}
+%\usepackage[colorlinks=true, allcolors=black]{hyperref}
+%\usepackage{makeidx}
 \usepackage{tikz}
 \usepackage{algorithm}
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
 \usepackage{mathtools}
 \usepackage{varwidth}
+
+\DeclareRobustCommand{\willy}[1]{
+\definecolor{mycolor#1}{RGB}{#1,#1,#1}
+}
+\willy{0}
+\willy{1}
+\willy{2}
+\willy{3}
+\willy{4}
+\willy{5}
+\willy{6}
+\willy{7}
+\willy{8}
+\willy{9}
+\willy{10}
+\willy{11}
+\willy{12}
+\willy{13}
+\willy{14}
+\willy{15}
+\willy{16}
+\willy{17}
+\willy{18}
+\willy{19}
+\willy{20}
+\willy{21}
+\willy{22}
+\willy{23}
+\willy{24}
+\willy{25}
+\willy{26}
+\willy{27}
+\willy{28}
+\willy{29}
+\willy{30}
+\willy{31}
+\willy{32}
+\willy{33}
+\willy{34}
+\willy{35}
+\willy{36}
+\willy{37}
+\willy{38}
+\willy{39}
+\willy{40}
+\willy{41}
+\willy{42}
+\willy{43}
+\willy{44}
+\willy{45}
+\willy{46}
+\willy{47}
+\willy{48}
+\willy{49}
+\willy{50}
+\willy{51}
+\willy{52}
+\willy{53}
+\willy{54}
+\willy{55}
+\willy{56}
+\willy{57}
+\willy{58}
+\willy{59}
+\willy{60}
+\willy{61}
+\willy{62}
+\willy{63}
+\willy{64}
+\willy{65}
+\willy{66}
+\willy{67}
+\willy{68}
+\willy{69}
+\willy{70}
+\willy{71}
+\willy{72}
+\willy{73}
+\willy{74}
+\willy{75}
+\willy{76}
+\willy{77}
+\willy{78}
+\willy{79}
+\willy{80}
+\willy{81}
+\willy{82}
+\willy{83}
+\willy{84}
+\willy{85}
+\willy{86}
+\willy{87}
+\willy{88}
+\willy{89}
+\willy{90}
+\willy{91}
+\willy{92}
+\willy{93}
+\willy{94}
+\willy{95}
+\willy{96}
+\willy{97}
+\willy{98}
+\willy{99}
+\willy{100}
+\willy{101}
+\willy{102}
+\willy{103}
+\willy{104}
+\willy{105}
+\willy{106}
+\willy{107}
+\willy{108}
+\willy{109}
+\willy{110}
+\willy{111}
+\willy{112}
+\willy{113}
+\willy{114}
+\willy{115}
+\willy{116}
+\willy{117}
+\willy{118}
+\willy{119}
+\willy{120}
+\willy{121}
+\willy{122}
+\willy{123}
+\willy{124}
+\willy{125}
+\willy{126}
+\willy{127}
+\willy{128}
+\willy{129}
+\willy{130}
+\willy{131}
+\willy{132}
+\willy{133}
+\willy{134}
+\willy{135}
+\willy{136}
+\willy{137}
+\willy{138}
+\willy{139}
+\willy{140}
+\willy{141}
+\willy{142}
+\willy{143}
+\willy{144}
+\willy{145}
+\willy{146}
+\willy{147}
+\willy{148}
+\willy{149}
+\willy{150}
+\willy{151}
+\willy{152}
+\willy{153}
+\willy{154}
+\willy{155}
+\willy{156}
+\willy{157}
+\willy{158}
+\willy{159}
+\willy{160}
+\willy{161}
+\willy{162}
+\willy{163}
+\willy{164}
+\willy{165}
+\willy{166}
+\willy{167}
+\willy{168}
+\willy{169}
+\willy{170}
+\willy{171}
+\willy{172}
+\willy{173}
+\willy{174}
+\willy{175}
+\willy{176}
+\willy{177}
+\willy{178}
+\willy{179}
+\willy{180}
+\willy{181}
+\willy{182}
+\willy{183}
+\willy{184}
+\willy{185}
+\willy{186}
+\willy{187}
+\willy{188}
+\willy{189}
+\willy{190}
+\willy{191}
+\willy{192}
+\willy{193}
+\willy{194}
+\willy{195}
+\willy{196}
+\willy{197}
+\willy{198}
+\willy{199}
+\willy{200}
+\willy{201}
+\willy{202}
+\willy{203}
+\willy{204}
+\willy{205}
+\willy{206}
+\willy{207}
+\willy{208}
+\willy{209}
+\willy{210}
+\willy{211}
+\willy{212}
+\willy{213}
+\willy{214}
+\willy{215}
+\willy{216}
+\willy{217}
+\willy{218}
+\willy{219}
+\willy{220}
+\willy{221}
+\willy{222}
+\willy{223}
+\willy{224}
+\willy{225}
+\willy{226}
+\willy{227}
+\willy{228}
+\willy{229}
+\willy{230}
+\willy{231}
+\willy{232}
+\willy{233}
+\willy{234}
+\willy{235}
+\willy{236}
+\willy{237}
+\willy{238}
+\willy{239}
+\willy{240}
+\willy{241}
+\willy{242}
+\willy{243}
+\willy{244}
+\willy{245}
+\willy{246}
+\willy{247}
+\willy{248}
+\willy{249}
+\willy{250}
+\willy{251}
+\willy{252}
+\willy{253}
+\willy{254}
+\willy{255}
+
 \usetikzlibrary{automata, positioning, decorations.text, topaths, arrows.meta, decorations.pathmorphing, quotes, shapes.geometric, arrows}
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 
@@ -42,11 +302,12 @@ initial text=$ $, % sets the text that appears on the start arrow
   \vskip\belowcaptionskip}%
 \makeatother
 
-\usepackage{color}
+%\usepackage{color}
 
-\definecolor{dkgreen}{rgb}{0,0.6,0}
-\definecolor{gray}{rgb}{0.5,0.5,0.5}
-\definecolor{mauve}{rgb}{0.58,0,0.82}
+%\definecolor{dkgreen}{rgb}{0,0.6,0}
+%\definecolor{gray}{rgb}{0.5,0.5,0.5}
+%\definecolor{mauve}{rgb}{0.58,0,0.82}
+
 
 \lstset{frame=tb,
   language=VHDL,
@@ -389,8 +650,47 @@ All'interno del process \texttt{STATES} si possono notare due macro momenti dell
 
 
 \section{Risultati dei Test}
-Write somenthing here!
+I test eseguiti sono stati pensati appositamente per evitare eventuali errori di programmazione, cercando di coprire il maggior numero di casi possibili. Per farlo, non solo sono stati creati dei test manualmente (dal \texttt{N.$1$} al \texttt{N.$5$} ), ma si è fatto ricorso sia al linguaggio \texttt{C} sia al linguaggio \texttt{Python} per la creazione di veri e propri generatori di test. Entrambi i generatori sono in grado di creare un numero di immagini (di dimensione diversa) in base alla decisione dell'utente. \\
+I test creati dai generatori sono stati a loro volta controllati manualmente. Difatto, dal controllo manuale, è emerso che le funzioni delle librerie randomiche nei due linguaggi, essendo uniformemente distribuite, rendevano praticamente certa la presenza dei valori $0$ e $255$ in una qualsiasi immmagine dalle dimensioni maggiori di 20x20. Immagini che hanno all'interno valori molto distanti tra loro rendono l'equalizzazione dell'immagine inutile. Un \textit{delta} molto grande porta inevitabilmente ad uno \textit{shift} nullo, il che significa che l'immagine non viene equalizzata ma semplicemente copiata. Per evitare, quindi, che i test fossero dei semplici copia-incolla, si è deciso di adottare una distribuzione Gaussiana, avendo così immagini con \textit{shift} di livello $8$ molto più probabili di quelli con \textit{shift} nullo. Dopo questa verifica e vista la semplicità nella scrittura di quest'algoritmo in un linguaggio ad alto livello si è supposta veritiera la correttezza dei test prodotti dai generatori. \\
+I test in questione hanno ottenuto i seguenti risultati:
+\begin{center}
+  \begin{tabular}{|c|l|p{10cm}|r|}
+    \hline
+    N. &Nome Test & Descrizione & Tempi\\
+    \hline
+    1 & tb\_2x2.vhd & Test base con una immagine 2x2 & 1487500 ps \\
+    \hline
+    2 & tb10.vhd & Test con 10 immagini 2x2 o 4x1, con caso particolare immagine con una dimensione nulla. Questo test usa tutti i valori di \textit{shift} possibili.&12392500 ps\\
+    \hline
+    3 & tb5\_delta.vhd & Test con 5 immagini 3x2 con valori di pixel molto vicini tra loro e caso particolare immagine 1x1. & 23522500 ps\\
+    \hline
+    4 & tbreset.vhd & Test con 8 immagini 2x2 nel quale viene chiamato il segnale \texttt{i\_rst} a fine di ogni compilazione d'immagine. & 1021300 ps\\
+    \hline
+    5 & tbAsync.vhd & Test con 8 immagini 2x2 nel quale viene chiamato il segnale \texttt{i\_rst} ogni due o ogni tre immagini. & 1021300 ps\\
+    \hline
+    6& tb128.vhd & Test con una singola immagine 128x128. Questo test è stato ottenuto con un generatore appositamente creato. & 2212818 ns\\
+    \hline
+    7 & tbHARD.vhd & Stress test con 100 immagini 128x128 senza chiamata al segnale \texttt{i\_rst}. Questo test è stato ottenuto con un genaratore reso disponibile da \mbox{Davivde Merli} su Github: \mbox{https://github.com/davidemerli/RL-generator-2020-2021.git} & 405796650 ns\\
+    \hline
+  \end{tabular}
+\end{center}
 
+In realtà sono stati fatti ulteriori test, con diverso numero di immagini, di varie dimensioni e con \textit{reset} ``casuale", tuttavia riportare ulteriori test a quelli presentati risulterebbe ridondante.
+
+\begin{center}
+  \begin{tikzpicture}
+    \draw[step=1cm,gray,very thin] (0,0) grid (6,6);
+    \fill[mycolor0] (0,0) rectangle (1,1);
+    \fill[mycolor200] (1,0) rectangle (2,1);
+    %\node[state] (start) [scale=1] {$START$};
+  \end{tikzpicture}
+  \hspace{2 cm}
+  \begin{tikzpicture}
+    \draw[step=1cm,gray,very thin] (0,0) grid (6,6);
+  \end{tikzpicture}
+\end{center}
+
+\pagebreak
 \section{Conclusioni}
 Write somenthing here
 
