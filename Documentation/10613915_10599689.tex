@@ -444,7 +444,6 @@ port (
 );
 end project_reti_logiche;
 \end{lstlisting}
-
 L'interfaccia del componente, per potersi relazionare con la memoria, deve essere come quella sopra riportata. I segnali di input vengono evidenziati dal prefisso \texttt{\lq i\_'}, mentre per i segnali di output è presente il prefisso \texttt{\lq o\_'}. Nel dettaglio:
 \begin{itemize}
   \item \textbf{i\_clk} scandisce il ciclo di clock della memoria, registrando \lq$1$' sul \texttt{rising\_edge}.
@@ -517,8 +516,7 @@ Lo stato \texttt{ABILIT\_WRITE} abilita la memoria alla scrittura. Viene invocat
 
 \pagebreak
 \subsubsection{WAIT\_MEM}
-\texttt{WAIT\_MEM} è uno stato centrale durante la gestione del flusso di dati. La sua funzione è quella di far ``sprecare" un ciclo di clock al processore. Ciò ci assicura sia in caso di scrittura, sia in caso di lettura, che i segnali in ingresso e in uscita siano letti o scritti correttamente. Nello specifico, questo stato evita che lo stato successivo lavori con dati relativi allo stato precedente. In base allo stato chiamante instrada lo stato prossimo in modo opportuno.\\
-
+\texttt{WAIT\_MEM} è uno stato centrale durante la gestione del flusso di dati. La sua funzione è quella di far ``sprecare" un ciclo di clock al processore. Ciò ci assicura sia in caso di scrittura, sia in caso di lettura, che i segnali in ingresso e in uscita siano letti o scritti correttamente. Nello specifico, questo stato evita che lo stato successivo lavori con dati relativi allo stato precedente. In base allo stato chiamante instrada lo stato prossimo in modo opportuno.\\ \\
 \textbf{N.B:} \textit{Alcune chiamate a questo stato potevano essere evitate. Questa informazione è emersa durante lo stress test a cui il processore è stato sottoposto. Tuttavia, è stato scelto di forzare ugualmente l’attesa per ovviare eventuali errori e per permettere la corretta acquisizione dei dati indipendentemente dal periodo di clock scelto. Ciò dovrebbe permettere una maggior robustezza, sebbene un aumento nella latenza della computazione.}
 
 \subsubsection{GET\_RC}
@@ -526,8 +524,7 @@ Lo stato \texttt{ABILIT\_WRITE} abilita la memoria alla scrittura. Viene invocat
 
 \subsubsection{GET\_DIM}
 Lo stato \texttt{GET\_DIM} si preoccupa di aggiornare il segnale \texttt{dim\_address} con l'indirizzo del primo bit libero per la scrittura. Il calcolo che ne determina il valore è: $n\_col \cdot n\_row + 2$.\\
-\texttt{GET\_DIM} verifica inoltre il caso speciale in cui una delle dimensioni dovesse essere nulla. In quel caso impone lo stato prossimo a \texttt{DONE}.\\
-
+\texttt{GET\_DIM} verifica inoltre il caso speciale in cui una delle dimensioni dovesse essere nulla. In quel caso impone lo stato prossimo a \texttt{DONE}.\\ \\
 \textbf{N.B:}\textit{
 La moltiplicazione usa segnali \textit{std\_logic\_vector} da $8$ bit e produce un risultato su $16$ bit. Essendo \texttt{dim\_address} un \textit{std\_logic\_vector} su $16$ bit, il problema non si pone.
 }
@@ -655,7 +652,7 @@ I test eseguiti sono stati pensati appositamente per evitare eventuali errori di
 I test creati dai generatori sono stati a loro volta controllati manualmente. Difatto, dal controllo manuale, è emerso che le funzioni delle librerie randomiche nei due linguaggi, essendo uniformemente distribuite, rendevano praticamente certa la presenza dei valori $0$ e $255$ in una qualsiasi immmagine dalle dimensioni maggiori di 20x20. Immagini che hanno all'interno valori molto distanti tra loro rendono l'equalizzazione dell'immagine inutile. Un \textit{delta} molto grande porta inevitabilmente ad uno \textit{shift} nullo, il che significa che l'immagine non viene equalizzata ma semplicemente copiata. Per evitare, quindi, che i test fossero dei semplici copia-incolla, si è deciso di adottare una distribuzione Gaussiana, avendo così immagini con \textit{shift} di livello $8$ molto più probabili di quelli con \textit{shift} nullo. Dopo questa verifica e vista la semplicità nella scrittura di quest'algoritmo in un linguaggio ad alto livello si è supposta veritiera la correttezza dei test prodotti dai generatori. \\
 I test in questione hanno ottenuto i seguenti risultati:
 \begin{center}
-  \begin{tabular}{|c|l|p{10cm}|r|}
+  \begin{tabular}{|c|l|p{8.5cm}|r|}
     \hline
     N. &Nome Test & Descrizione & Tempi\\
     \hline
@@ -671,11 +668,10 @@ I test in questione hanno ottenuto i seguenti risultati:
     \hline
     6& tb128.vhd & Test con una singola immagine 128x128. Questo test è stato ottenuto con un generatore appositamente creato. & 2212818 ns\\
     \hline
-    7 & tbHARD.vhd & Stress test con 100 immagini 128x128 senza chiamata al segnale \texttt{i\_rst}. Questo test è stato ottenuto con un genaratore reso disponibile da \mbox{Davivde Merli} su Github: \mbox{https://github.com/davidemerli/RL-generator-2020-2021.git} & 405796650 ns\\
+    7 & tbHARD.vhd & Stress test con 100 immagini 128x128 senza chiamata al segnale \texttt{i\_rst}. Questo test è stato ottenuto con un genaratore reso disponibile da \mbox{Davivde Merli} su Github: https://github.com/davidemerli/RL-generator-2020-2021.git & 405796650 ns\\
     \hline
   \end{tabular}
 \end{center}
-
 In realtà sono stati fatti ulteriori test, con diverso numero di immagini, di varie dimensioni e con \textit{reset} ``casuale", tuttavia riportare ulteriori test a quelli presentati risulterebbe ridondante.
 
 QUI FORMULA PER IL CALCOLO DEL CLOCK LIMITE PRIMA DELLA ROTTURA
