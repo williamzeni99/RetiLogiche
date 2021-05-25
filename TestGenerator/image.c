@@ -27,6 +27,7 @@ void main(int argc, char const *argv[]) {
   char precap[100]="\\caption{Pre-equalizzazione} \\label{FIG}\n";
   char postcap[100]="\\caption{Post-equalizzazione} \\label{FIG}\n";
   char center[100]= "\\centering\n";
+  char cleancap[100]="\\captionsetup[subfigure]{labelformat=empty}";
 
 
   printf("Inserisci il nome del file >> ");
@@ -42,6 +43,7 @@ void main(int argc, char const *argv[]) {
   if(in){
     fprintf(in,"%s",bfigure);
     fprintf(in,"%s",center);
+    fprintf(in,"%s",cleancap);
     fprintf(in, "%s",bsubfig);
     fprintf(in,"%s",btikz);
     fprintf(in,"\\draw[step=%fcm,gray,very thin] (0,0) grid (%f,%f);\n",step,(float)col*step,(float)row*step);
