@@ -369,7 +369,7 @@ initial text=$ $, % sets the text that appears on the start arrow
 
 \section{Introduzione}
 \subsection{Scopo del progetto}
-Lo scopo del progetto è quello di creare un componente hardware sintetizzabile, in grado di equalizzare un immagine. L'algoritmo che ne prevede l'equalizzazione si ispira ad una versione semplificata del metodo di equalizzazione dell'istogramma, il quale prevede un aumento nel contrasto di un immagine su scala di grigi. In generale l'elaborazione digitale dell'immagine risulta più evidente specialmente quando i dati raccolti sono rappresentati da valori di intensità molto vicini. Per cui, se una immagine contenesse una scala di grigi molto ampia, l'effeto dell'equalizzazione risulterebbe pressochè nullo.
+Lo scopo del progetto è quello di creare un componente hardware sintetizzabile, in grado di equalizzare un immagine. L'algoritmo che ne prevede l'equalizzazione si ispira ad una versione semplificata del metodo di equalizzazione dell'istogramma, il quale applica un aumento nel contrasto di un immagine su scala di grigi. In generale l'elaborazione digitale dell'immagine risulta più evidente specialmente quando i dati raccolti sono rappresentati da valori di intensità molto vicini. Per cui, se una immagine contenesse una scala di grigi molto ampia, l'effeto dell'equalizzazione risulterebbe pressochè nullo.
 
 \subsection{Specifiche generali}
 Si definisca un immagine dalle dimensioni variabili, ma di massimo $128 \times 128$, e si definisca una memoria lineare nella quale i primi due valori siano le dimensioni dell'immagine e i restanti i valori assegnati ad ogni pixel, il componente hardware dovrà scrivere in coda alla memoria l'immagine equalizzata pixel per pixel.
@@ -450,7 +450,7 @@ L'interfaccia del componente, per potersi relazionare con la memoria, deve esser
   \item \textbf{i\_rst} è il segnale di \texttt{RESET}, viene chiamato all'inizio della computazione di una o più immagini. Se si registra \lq$1$' su questo segnale la computazione deve essere terminata e ripristinata al momento di partenza.
   \item \textbf{i\_start} determina l'inizio della coputazione. Questo segnale rimane alto fino a quando la computazione non termina. La computazione può iniziare solo se il segnale è basso.
   \item \textbf{i\_data} raccoglie i dati inviati dalla memoria.
-  \item \textbf{o\_address} è il segnale attraverso il quale facciamo richieste alla memoria. Sostanzialmente su questo segnale si pone l'indirizzo della memoria che si vuuole leggere o sulla quale si vuole scrivere.
+  \item \textbf{o\_address} è il segnale attraverso il quale si possono fare richieste alla memoria. Sostanzialmente su questo segnale si pone l'indirizzo della memoria che si vuuole leggere o sulla quale si vuole scrivere.
   \item \textbf{o\_done} determina la fine della computazione. Il segnale deve essere portato alto quando si vuole terminare la computazione e deve rimanere alto fino a quando la memoria non porti il segnale di \texttt{START} basso. Solo in quel caso il segnale viene riportato basso.
   \item \textbf{o\_en} abilita la memoria alla lettura o alla scrittura.
   \item \textbf{o\_we}  abilita la memoria alla scrittura. Quando questo segnale è alto la memoria si aspetta un dato in ingresso da scrivere.
@@ -488,7 +488,9 @@ port map (
           o_data      => mem_i_data
           );
 \end{lstlisting}
-
+La memoria ha un'interfaccia che dialoga direttamente con il componente sintetizzato come indicato dalla \textit{port map} rappresentata in \texttt{Fig.2}. È indirizzabile al \textit{byte} e ha una dimensione massima di $N_{col}*N_{row}*2+2$ dove nel caso pessimo $N_{col}$ e $N_{row}$ hanno un valore di $128$ \textit{byte}. Pertanto, la dimensione massima supportabile dalla memoria deve essere di $2^7 * 2^7 *2 + 2$, ovvero di $32770$ \textit{byte}. Come si può notare dalla definizione della sua entity (\texttt{Fig.1}), per evitare eventuali errori, si è deciso di dedicare al componente uno spazio di $2^{16}$ \textit{byte}. Ogni singolo \textit{byte} è definito a sua volta da un \textit{std\_logic\_vector} di $8$ \textit{bit} di tipo \texttt{unsigned} e può avere un valore compreso tra $0$ e $255$, dove $0$ rappresenta il pixel nero e $255$ rappresenta il pixel bianco.
+Qualora fosse prevista l'elaborazione di più immmagini, vi sarà la necessità di definire più memorie in cascata. \\
+La costante \texttt{c\_CLOCK\_PERIOD} è quella che determina il ciclo di \textit{clock} del componente e deve essere mantenuta per specifica sotto i $100$ \textit{ns}.
 \pagebreak
 \section{Desing Pattern}
 \subsection{Scelte Progettuali}
@@ -497,7 +499,7 @@ Il primo ha il compito di relazionarsi con la memoria e il secondo contiene gli 
 Per permette un corretto dialogo tra i due process è nata l'esigenza di avere dei segnali ``duplicati".
 I segnali con suffisso \texttt{\lq\_cp'} sono stati introdotti per mantere in memoria i valori computati, mentre i segnali con suffisso \texttt{\lq\_next'} sono stati implementati allo scopo di permettere agli stati di far richieste alla memoria.
 Nel particolare, per ogni ciclo di clock, durante il \textit{rising\_edge}, il process \texttt{UPDATE} si risveglia, aggiornando i segnali. I segnali contenenti i valori da mantenere vengono reimpostati con i segnali \texttt{\lq\_cp'}, mentre i segnali di output della \textit{entity} sono aggiornati con i segnali \texttt{\lq\_next'}.\\
-Il process \texttt{STATES} è a tutti gli effetti un \texttt{FSA} (\textit{Macchina a Stati Finiti}) rappresentabile attraverso lo schema al paragrafo $2.3.1$.
+Il process \texttt{STATES} è a tutti gli effetti un \texttt{FSM} (\textit{Macchina a Stati Finiti}) rappresentabile attraverso lo schema al paragrafo $2.3$.
 Il suo funzionamento è permesso sostanzialmente da tre segnali a lui dedicati: \texttt{next\_state}, che identifica la chiamata allo stato prossimo,  \texttt{curr\_state}, che rileva lo stato corrente, e \texttt{prev\_state}, che conserva lo stato precedente.
 
 \subsection{Elenco Stati - Process STATES}
@@ -523,14 +525,14 @@ Lo stato \texttt{ABILIT\_WRITE} abilita la memoria alla scrittura. Viene invocat
 \texttt{GET\_RC} si occupa della lettura dei primi due pixel della memoria in cui sono contenute le dimensioni dell’immagine da modificare. Viene invocato dopo l'abilitazione della memoria alla lettura e aggiorna i segnali \texttt{n\_col} e \texttt{n\_row}. Lo stato richiama se stesso fino a quando non ha aggiornato i due segnali, altrimenti imposta lo stato prossimo a \texttt{GET\_DIM}.
 
 \subsubsection{GET\_DIM}
-Lo stato \texttt{GET\_DIM} si preoccupa di aggiornare il segnale \texttt{dim\_address} con l'indirizzo del primo bit libero per la scrittura. Il calcolo che ne determina il valore è: $n\_col \cdot n\_row + 2$.\\
+Lo stato \texttt{GET\_DIM} si preoccupa di aggiornare il segnale \texttt{dim\_address} con l'indirizzo del primo \textit{byte} libero per la scrittura. Il calcolo che ne determina il valore è: $n\_col \cdot n\_row + 2$.\\
 \texttt{GET\_DIM} verifica inoltre il caso speciale in cui una delle dimensioni dovesse essere nulla. In quel caso impone lo stato prossimo a \texttt{DONE}.\\ \\
 \textbf{N.B:}\textit{
 La moltiplicazione usa segnali \textit{std\_logic\_vector} da $8$ bit e produce un risultato su $16$ bit. Essendo \texttt{dim\_address} un \textit{std\_logic\_vector} su $16$ bit, il problema non si pone.
 }
 
 \subsubsection{READ\_PIXEL}
-\texttt{READ\_PIXEL} è uno stato strettamente connesso con lo stato \texttt{GET\_MINMAX}. Richiede alla memoria il valore del pixel da leggere e aggiorna il segnale \texttt{curr\_address} a quello successivo. In questo modo il valore del pixel sarà disponibile sul segnale \texttt{i\_data} dopo due \textit{rising\_edge} successivi. L'attesa è sempre lasciata allo stato \texttt{WAIT\_MEM}.
+\texttt{READ\_PIXEL} è uno stato strettamente connesso con lo stato \texttt{GET\_MINMAX}. Richiede alla memoria il valore del pixel da leggere e aggiorna il segnale \texttt{curr\_address} a quello successivo. In questo modo il valore del pixel sarà disponibile sul segnale \texttt{i\_data} dopo due \textit{rising\_edge}. L'attesa è sempre lasciata allo stato \texttt{WAIT\_MEM}.
 
 \subsubsection{GET\_MINMAX}
 \texttt{GET\_MINMAX} aggiorna i segnali \texttt{max\_pixel\_value} e \texttt{min\_pixel\_value}, inizializzati rispettivamente con $0$ e $255$, con il valore di \texttt{i\_data}. Questo avviene se e solo se si verifica che \texttt{i\_data} è \textit{maggiore} di \texttt{max\_pixel\_value} (in questo caso aggiorna \texttt{max\_pixel\_value}) oppure se \texttt{i\_data} è \textit{minore} di \texttt{min\_pixel\_value} (in questo caso aggiorna \texttt{min\_pixel\_value}). Infine, imposta lo stato prossimo a \texttt{READ\_PIXEL}
@@ -585,7 +587,7 @@ Successivamente il segnale \texttt{o\_done} viene portato ad `$1$' e lo stato pr
 Ultimo stato del processo. Ha lo scopo di restare in attesa che il segnale di \texttt{i\_start} venga riportato a `$0$'. Finche ciò non avviene, \texttt{ WAITING\_PIC} richiama se stesso. Quando sia \texttt{i\_start} che \texttt{o\_done} hanno il segnale a `$0$', imposta lo stato prossimo a \texttt{START} facendo ricominciare l’intera compilazione.
 
 \subsection{Approfondimento sul process STATES}
-All'interno del process \texttt{STATES} si possono notare due macro momenti della computazione. Il primo (in rosso sullo schema al paragrafo successivo) è quello descritto dalla prima lettura completa della memoria, attraverso la quale si determinano tutti i valori necessari per la computazione del nuovo pixel. Si noti inoltre che all'interno del primo momento abbiamo due cicli ben distinti: uno per il calcolo del \textit{max\_value} e \textit{min\_value} e uno per il calcolo dello \textit{shift\_level} (rispettivamente in blue e marrone). Il secondo momento (in verde), invece, è descritto dalla seconda lettura semi-completa della memoria (difatto si esclude la lettura dei primi $2$ \textit{byte}) ed è il momento nel quale il pixel appena letto viene rielaborato e salvato in memoria nel \textit{byte} opportuno. Questa doppia lettura della memoria, sebbene aumenti la complessità temporale, è strettamente necessaria, per via del calcolo del \textit{delta}. Iniziamente, si era pensato di ottimizzare il secondo momento con due proeccess paralleli: il primo avrebbe elaborato i pixel pari, mentre il secondo i pixel dispari, e sarebbero stati gestiti da opportuni `semafori'. Tuttavia, la struttura attuale è risultata essere molto più stabile nei test, permettendoci anche di variare a nostra discrezione il tempo di clock della computazione.
+All'interno del process \texttt{STATES} si possono notare due macro momenti della computazione. Il primo è quello descritto dalla prima lettura completa della memoria (da \texttt{START} a \texttt{GET\_PIXEL}), attraverso la quale si determinano tutti i valori necessari per la computazione del nuovo pixel. Si noti inoltre che all'interno del primo momento abbiamo due cicli ben distinti: uno per il calcolo del \textit{max\_value} e \textit{min\_value} e uno per il calcolo dello \textit{shift\_level}. Il secondo momento (fino a \texttt{DONE}), invece, è descritto dalla seconda lettura semi-completa della memoria (difatto si esclude la lettura dei primi $2$ \textit{byte}) ed è il momento nel quale il pixel appena letto viene rielaborato e salvato in memoria nel \textit{byte} opportuno. Questa doppia lettura della memoria, sebbene aumenti la complessità temporale, è strettamente necessaria, per via del calcolo del \textit{delta}. Iniziamente, si era pensato di ottimizzare il secondo momento con due proeccess paralleli: il primo avrebbe elaborato i pixel pari, mentre il secondo i pixel dispari, e sarebbero stati gestiti da opportuni `semafori'. Tuttavia, la struttura attuale è risultata essere molto più stabile nei test, permettendoci anche di variare a nostra discrezione il tempo di clock della computazione.
 \includegraphics[width=16cm, height=11.5cm]{FSM.png}
 %\pagebreak
 %\subsubsection{Schema process STATES}
@@ -671,12 +673,11 @@ I test in questione hanno ottenuto i seguenti risultati:
   \end{tabular}
 \end{center}
 In realtà sono stati fatti ulteriori test, con diverso numero di immagini, di varie dimensioni e con \textit{reset} ``casuale", tuttavia riportare ulteriori test a quelli presentati risulterebbe ridondante.
-
-QUI FORMULA PER IL CALCOLO DEL CLOCK LIMITE PRIMA DELLA ROTTURA
+Si noti inoltre che, per verificare la robustezza del codice, il periodo di \textit{clock} è stato impostato sempre in modo casuale per un qualsiasi valore compreso tra l' $1.1$ \textit{ns} e i $100$ \textit{ns}. Il periodo di \textit{clock} minimo supportato dal nostro processore è risultato essere $1.1$ \textit{ns}. Per completezza i test sono stati fatti sia in pre-sintesi che in post-sintesi.
 \pagebreak
 
 \subsection{Esempi di equalizzazione}
-Lo scopo del progetto era quello di equalizzare un'immagine con il metodo dell'istogramma. Pertanto, sarebbe totalizzante verificare in maniera grafica che il nostro processore elabori in maniera opportuna le immagini fornitogli. In allegato è stata proposta l'elaborazione di tre immagini di diversa risoluzione. Le immagini sono state ottenute modificando il progetto \texttt{VHDL} per ottenere su file testuale i pixel fornitogli e quelli equalizzati. Successivamente, attravero un programma in \texttt{C}, i dati sono stati raccolti per la creazione dell'immagine in \texttt{LaTeX}.\\
+Lo scopo del progetto era quello di equalizzare un'immagine con il metodo dell'istogramma. Pertanto, potrebbe essere totalizzante verificare in maniera grafica che il processore elabori in maniera opportuna le immagini fornitogli. In allegato è stata proposta l'elaborazione di tre immagini di diversa risoluzione. Le immagini sono state create attraverso il generatore di test e sono state equalizzate modificando il progetto \texttt{VHDL} per ottenere su file testuale i pixel rielaborati. Successivamente, attravero un programma in \texttt{C}, i dati sono stati raccolti per la creazione delle immagini in \texttt{LaTeX}.\\
 
 
 \begin{figure}[h]
