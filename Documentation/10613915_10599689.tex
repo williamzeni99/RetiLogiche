@@ -11,7 +11,8 @@
 % Useful packages
 \usepackage{float}
 \usepackage{amsmath}
-%\usepackage{graphicx}
+\usepackage{graphicx}
+\usepackage{wrapfig}
 %\usepackage[colorlinks=true, allcolors=black]{hyperref}
 %\usepackage{makeidx}
 \usepackage{algorithm}
@@ -655,7 +656,7 @@ I test in questione hanno ottenuto i seguenti risultati:
   \begin{tabular}{|c|l|p{8.5cm}|r|}
     \hline
     N. &Nome Test & Descrizione & Tempi\\
-    \hline
+    \hline \hline
     1 & tb\_2x2.vhd & Test base con una immagine 2x2 & 1487500 ps \\
     \hline
     2 & tb10.vhd & Test con 10 immagini 2x2 o 4x1, con caso particolare immagine con una dimensione nulla. Questo test usa tutti i valori di \textit{shift} possibili.&12392500 ps\\
@@ -1791,20 +1792,23 @@ Lo scopo del progetto era quello di equalizzare un'immagine con il metodo dell'i
 
 \pagebreak
 \section{Conclusioni}
-Write somenthing here
-
-
-+-------------------------+------+-------+-----------+-------+
-|        Site Type        | Used | Fixed | Available | Util% |
-+-------------------------+------+-------+-----------+-------+
-| Slice LUTs              |  370 |     0 |      8000 |  4.63 |
-|   LUT as Logic          |  370 |     0 |      8000 |  4.63 |
-|   LUT as Memory         |    0 |     0 |      5000 |  0.00 |
-| Slice Registers         |  268 |     0 |     16000 |  1.68 |
-|   Register as Flip Flop |  237 |     0 |     16000 |  1.48 |
-|   Register as Latch     |   31 |     0 |     16000 |  0.19 |
-| F7 Muxes                |    0 |     0 |      7300 |  0.00 |
-| F8 Muxes                |    0 |     0 |      3650 |  0.00 |
-+-------------------------+------+-------+-----------+-------+
+\begin{wrapfigure}{r}{0.40\textwidth}
+  \begin{tabular}{|l|r|}
+    \hline
+    Site Type & Used\\
+    \hline \hline
+    Slice LUTs & 370\\
+    \hspace{0.5cm} LUT as Logic & 370\\
+    \hspace{0.5cm} LUT as Memory & 0\\
+    \hline
+    Slice Registers & 268\\
+    \hspace{0.5cm} Register as Flip Flop & 237\\
+    \hspace{0.5cm} Register as Latch & 31\\
+    \hline
+    Muxes & 0\\
+    \hline
+  \end{tabular}
+\end{wrapfigure}
+A seguito della sintesi attraverso il tool Vivado è emerso il seguente report. Il report mostra il numero di \textit{Look Up Table} utilizzate dal processore e i relativi registri, sia di tipo \textit{Flip FLop}, sia di tipo \textit{Latch}. Come si può vedere il processore non usufruisce di \textit{Mux - Multiplexer}.
 
 \end{document}
