@@ -370,10 +370,10 @@ initial text=$ $, % sets the text that appears on the start arrow
 
 \section{Introduzione}
 \subsection{Scopo del progetto}
-Lo scopo del progetto è quello di creare un componente hardware sintetizzabile, in grado di equalizzare un immagine. L'algoritmo che ne prevede l'equalizzazione si ispira ad una versione semplificata del metodo di equalizzazione dell'istogramma, il quale applica un aumento nel contrasto di un immagine su scala di grigi. In generale l'elaborazione digitale dell'immagine risulta più evidente specialmente quando i dati raccolti sono rappresentati da valori di intensità molto vicini. Per cui, se una immagine contenesse una scala di grigi molto ampia, l'effeto dell'equalizzazione risulterebbe pressochè nullo.
+Lo scopo del progetto è quello di creare un componente hardware sintetizzabile, in grado di equalizzare un immagine. L'algoritmo che ne prevede l'equalizzazione è una versione semplificata del metodo di equalizzazione dell'istogramma, il quale applica un aumento nel contrasto di un immagine su scala di grigi. In generale l'elaborazione digitale dell'immagine risulta più evidente specialmente quando i dati raccolti sono rappresentati da valori di intensità molto vicini. Per cui, se una immagine contenesse una scala di grigi molto ampia, l'effeto dell'equalizzazione risulterebbe pressochè nullo.
 
 \subsection{Specifiche generali}
-Si definisca un immagine dalle dimensioni variabili, ma di massimo $128 \times 128$, e si definisca una memoria lineare nella quale i primi due valori siano le dimensioni dell'immagine e i restanti i valori assegnati ad ogni pixel, il componente hardware dovrà scrivere in coda alla memoria l'immagine equalizzata pixel per pixel.
+Si definisca un immagine dalle dimensioni variabili, ma di massimo $128 \times 128$ pixel, e si definisca una memoria lineare nella quale i primi due valori siano le dimensioni dell'immagine e i restanti i valori assegnati ad ogni pixel, il componente hardware dovrà scrivere in coda alla memoria l'immagine equalizzata pixel per pixel.
 Il risultato sarà una memoria complessivamente lunga $2 \cdot N_{col} \cdot N_{row} +2$, dove $N_{row}$ e $N_{col}$ sono rispettivamente il numero di righe e di colonne dell'immagine. A partire dalla posizione 2, per ogni pixel si avrà il corrispettivo pixel equalizzato ad una distanza $N_{col} \cdot N_{row}$ come mostrato in figura.
 \\
 \\
@@ -401,7 +401,7 @@ Il risultato sarà una memoria complessivamente lunga $2 \cdot N_{col} \cdot N_{
 \fill[text=black] (11.5,0.5) node{\dots};
 \end{tikzpicture}
 \\
-La memoria dialogherà in stretto contatto con il componente attraverso due segnali, che determineranno l'avvio della computazione, la sua terminazione e l'eventuale ripartenza. Si noti che la computazione di una singola immagine, una volta iniziata, non potrà mai essere interrotta, ma rimane possibile la computazione di più immagini.\\
+La memoria dialogherà con il componente attraverso due segnali, che determineranno l'avvio della computazione, la sua terminazione e l'eventuale ripartenza. Si noti che la computazione di una singola immagine, una volta iniziata, non potrà mai essere interrotta, ma rimane possibile la computazione di più immagini.\\
 \\
 Ogni pixel avrà un valore compreso tra $0$ e $255$ e verrà rielaborato dal componente nel seguente modo:\\
 \\
@@ -448,14 +448,14 @@ end project_reti_logiche;
 L'interfaccia del componente, per potersi relazionare con la memoria, deve essere come quella sopra riportata. I segnali di input vengono evidenziati dal prefisso \texttt{\lq i\_'}, mentre per i segnali di output è presente il prefisso \texttt{\lq o\_'}. Nel dettaglio:
 \begin{itemize}
   \item \textbf{i\_clk} scandisce il ciclo di clock della memoria, registrando \lq$1$' sul \texttt{rising\_edge}.
-  \item \textbf{i\_rst} è il segnale di \texttt{RESET}, viene chiamato all'inizio della computazione di una o più immagini. Se si registra \lq$1$' su questo segnale la computazione deve essere terminata e ripristinata al momento di partenza.
+  \item \textbf{i\_rst} è il segnale di \texttt{RESET}. Viene chiamato all'inizio della computazione di una o più immagini. Se si registra \lq$1$' su questo segnale la computazione deve essere terminata e ripristinata al momento di partenza.
   \item \textbf{i\_start} determina l'inizio della coputazione. Questo segnale rimane alto fino a quando la computazione non termina. La computazione può iniziare solo se il segnale è basso.
-  \item \textbf{i\_data} raccoglie i dati inviati dalla memoria.
+  \item \textbf{i\_data} raccoglie i dati letti dalla memoria.
   \item \textbf{o\_address} è il segnale attraverso il quale si possono fare richieste alla memoria. Sostanzialmente su questo segnale si pone l'indirizzo della memoria che si vuuole leggere o sulla quale si vuole scrivere.
   \item \textbf{o\_done} determina la fine della computazione. Il segnale deve essere portato alto quando si vuole terminare la computazione e deve rimanere alto fino a quando la memoria non porti il segnale di \texttt{START} basso. Solo in quel caso il segnale viene riportato basso.
-  \item \textbf{o\_en} abilita la memoria alla lettura o alla scrittura.
+  \item \textbf{o\_en} abilita la comunicazione con la memoria.
   \item \textbf{o\_we}  abilita la memoria alla scrittura. Quando questo segnale è alto la memoria si aspetta un dato in ingresso da scrivere.
-  \item \textbf{o\_data} è il dato che la memoria si aspetta di leggere quando la scrittura è attiva.
+  \item \textbf{o\_data} è il dato che la memoria si aspetta di ricevere quando la scrittura è attiva.
 \end{itemize}
 \pagebreak
 \subsection{Dati e Descrizione memoria}
@@ -491,7 +491,7 @@ port map (
 \end{lstlisting}
 La memoria ha un'interfaccia che dialoga direttamente con il componente sintetizzato come indicato dalla \textit{port map} rappresentata in \texttt{Fig.2}. È indirizzabile al \textit{byte} e ha una dimensione massima di $N_{col}*N_{row}*2+2$ dove nel caso pessimo $N_{col}$ e $N_{row}$ hanno un valore di $128$ \textit{byte}. Pertanto, la dimensione massima supportabile dalla memoria deve essere di $2^7 * 2^7 *2 + 2$, ovvero di $32770$ \textit{byte}. Come si può notare dalla definizione della sua entity (\texttt{Fig.1}), per evitare eventuali errori, si è deciso di dedicare al componente uno spazio di $2^{16}$ \textit{byte}. Ogni singolo \textit{byte} è definito a sua volta da un \textit{std\_logic\_vector} di $8$ \textit{bit} di tipo \texttt{unsigned} e può avere un valore compreso tra $0$ e $255$, dove $0$ rappresenta il pixel nero e $255$ rappresenta il pixel bianco.
 Qualora fosse prevista l'elaborazione di più immmagini, vi sarà la necessità di definire più memorie in cascata. \\
-La costante \texttt{c\_CLOCK\_PERIOD} è quella che determina il ciclo di \textit{clock} del componente e deve essere mantenuta per specifica sotto i $100$ \textit{ns}.
+La costante \texttt{c\_CLOCK\_PERIOD} determina il ciclo di \textit{clock} del componente e deve essere mantenuta per specifica sotto i $100$ \textit{ns}.
 \pagebreak
 \section{Desing Pattern}
 \subsection{Scelte Progettuali}
