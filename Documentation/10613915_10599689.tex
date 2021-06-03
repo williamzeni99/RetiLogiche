@@ -495,18 +495,18 @@ La costante \texttt{c\_CLOCK\_PERIOD} determina il ciclo di \textit{clock} del c
 \pagebreak
 \section{Desing Pattern}
 \subsection{Scelte Progettuali}
-La struttura del progetto è stata suddivisa in due process principali: \texttt{UPDATE} e \texttt{STATES}.
-Il primo ha il compito di relazionarsi con la memoria e il secondo contiene gli stati della macchina impiegati nella equalizzazione delle immagini. In questo modo una porzione di codice è adibita esclusivamente alla computazione dei pixel (process \texttt{STATES}), mentre la rimanente si occupa dei segnali di output della \textit{entity} (process \texttt{UPDATE}).\\
+La struttura del progetto è stata realizzata mediante due process, chiamati rispettivamente \texttt{UPDATE} e \texttt{STATES}.
+Il primo ha il compito di comunicare con la memoria, mentre il secondo contiene gli stati della macchina impiegati nella equalizzazione delle immagini. In questo modo una porzione di codice è adibita esclusivamente alla computazione dei pixel (process \texttt{STATES}), mentre la rimanente si occupa dei segnali di output della \textit{entity} (process \texttt{UPDATE}).\\
 Per permette un corretto dialogo tra i due process è nata l'esigenza di avere dei segnali ``duplicati".
 I segnali con suffisso \texttt{\lq\_cp'} sono stati introdotti per mantere in memoria i valori computati, mentre i segnali con suffisso \texttt{\lq\_next'} sono stati implementati allo scopo di permettere agli stati di far richieste alla memoria.
 Nel particolare, per ogni ciclo di clock, durante il \textit{rising\_edge}, il process \texttt{UPDATE} si risveglia, aggiornando i segnali. I segnali contenenti i valori da mantenere vengono reimpostati con i segnali \texttt{\lq\_cp'}, mentre i segnali di output della \textit{entity} sono aggiornati con i segnali \texttt{\lq\_next'}.\\
 Il process \texttt{STATES} è a tutti gli effetti un \texttt{FSM} (\textit{Macchina a Stati Finiti}) rappresentabile attraverso lo schema al paragrafo $2.3$.
-Il suo funzionamento è permesso sostanzialmente da tre segnali a lui dedicati: \texttt{next\_state}, che identifica la chiamata allo stato prossimo,  \texttt{curr\_state}, che rileva lo stato corrente, e \texttt{prev\_state}, che conserva lo stato precedente.
+Il suo funzionamento è reso possibile da tre segnali a lui riservati: \texttt{next\_state}, che identifica la chiamata allo stato prossimo,  \texttt{curr\_state}, che rileva lo stato corrente, e \texttt{prev\_state}, che conserva lo stato precedente.
 
 \subsection{Elenco Stati - Process STATES}
 
 \subsubsection{START}
-Lo stato di \texttt{START} è il primo stato del process \texttt{STATES} ed è stato pensato come stato di attesa iniziale. Questo stato viene invocato in due situazioni differenti: se il segnale di \texttt{i\_rst} viene portato alto, oppure quando il segnale \texttt{i\_start} viene riportato basso dopo la computazione di un immagine. Lo stato \texttt{START} non cambia fino a quando il segnale \texttt{i\_start} non viene portato alto. In quel momento lo stato successivo viene impostato a \texttt{INIT}.
+ \texttt{START} è il primo stato del process \texttt{STATES} ed è stato pensato come fase di attesa iniziale. Questo stato viene invocato in due situazioni differenti: se il segnale di \texttt{i\_rst} viene portato alto, oppure quando il segnale \texttt{i\_start} viene riportato basso dopo la computazione di un immagine. Lo stato \texttt{START} non cambia fino a quando il segnale \texttt{i\_start} non viene portato alto. In quel momento lo stato successivo viene impostato a \texttt{INIT}.
 
 \subsubsection{INIT}
 \texttt{INIT} è uno stato di transizione nel quale il processore si assicura che i segnali siano inizializzati con i valori opportuni. Successivamente imposta lo stato prossimo a \texttt{ABILIT\_READ}.
@@ -519,33 +519,33 @@ Lo stato \texttt{ABILIT\_WRITE} abilita la memoria alla scrittura. Viene invocat
 
 \pagebreak
 \subsubsection{WAIT\_MEM}
-\texttt{WAIT\_MEM} è uno stato centrale durante la gestione del flusso di dati. La sua funzione è quella di far ``sprecare" un ciclo di clock al processore. Ciò ci assicura sia in caso di scrittura, sia in caso di lettura, che i segnali in ingresso e in uscita siano letti o scritti correttamente. Nello specifico, questo stato evita che lo stato successivo lavori con dati relativi allo stato precedente. In base allo stato chiamante instrada lo stato prossimo in modo opportuno.\\ \\
+\texttt{WAIT\_MEM} è uno stato centrale durante la gestione del flusso di dati. La sua funzione è quella di far ``sprecare" un ciclo di clock al processore. Ciò ci assicura sia in caso di scrittura, sia in caso di lettura, che i segnali in ingresso e in uscita siano letti o scritti correttamente. Nello specifico, questo stato evita che lo stato successivo lavori con dati obsoleti relativi allo stato precedente. In base allo stato chiamante instrada lo stato prossimo in modo opportuno.\\ \\
 \textbf{N.B:} \textit{Alcune chiamate a questo stato potevano essere evitate. Questa informazione è emersa durante lo stress test a cui il processore è stato sottoposto. Tuttavia, è stato scelto di forzare ugualmente l’attesa per ovviare eventuali errori e per permettere la corretta acquisizione dei dati indipendentemente dal periodo di clock scelto. Ciò dovrebbe permettere una maggior robustezza, sebbene un aumento nella latenza della computazione.}
 
 \subsubsection{GET\_RC}
 \texttt{GET\_RC} si occupa della lettura dei primi due pixel della memoria in cui sono contenute le dimensioni dell’immagine da modificare. Viene invocato dopo l'abilitazione della memoria alla lettura e aggiorna i segnali \texttt{n\_col} e \texttt{n\_row}. Lo stato richiama se stesso fino a quando non ha aggiornato i due segnali, altrimenti imposta lo stato prossimo a \texttt{GET\_DIM}.
 
 \subsubsection{GET\_DIM}
-Lo stato \texttt{GET\_DIM} si preoccupa di aggiornare il segnale \texttt{dim\_address} con l'indirizzo del primo \textit{byte} libero per la scrittura. Il calcolo che ne determina il valore è: $n\_col \cdot n\_row + 2$.\\
+Lo stato \texttt{GET\_DIM} ha lo scopo di aggiornare il segnale \texttt{dim\_address} con l'indirizzo del primo \textit{byte} libero per la scrittura. Il calcolo che ne determina il valore è: $n\_col \cdot n\_row + 2$.\\
 \texttt{GET\_DIM} verifica inoltre il caso speciale in cui una delle dimensioni dovesse essere nulla. In quel caso impone lo stato prossimo a \texttt{DONE}.\\ \\
 \textbf{N.B:}\textit{
-La moltiplicazione usa segnali \textit{std\_logic\_vector} da $8$ bit e produce un risultato su $16$ bit. Essendo \texttt{dim\_address} un \textit{std\_logic\_vector} su $16$ bit, il problema non si pone.
+La moltiplicazione usa segnali \textit{std\_logic\_vector} da $8$ bit e produce un risultato su $16$ bit. Essendo \texttt{dim\_address} un \textit{std\_logic\_vector} su $16$ bit, non incorrono problemi durante il calcolo.
 }
 
 \subsubsection{READ\_PIXEL}
 \texttt{READ\_PIXEL} è uno stato strettamente connesso con lo stato \texttt{GET\_MINMAX}. Richiede alla memoria il valore del pixel da leggere e aggiorna il segnale \texttt{curr\_address} a quello successivo. In questo modo il valore del pixel sarà disponibile sul segnale \texttt{i\_data} dopo due \textit{rising\_edge}. L'attesa è sempre lasciata allo stato \texttt{WAIT\_MEM}.
 
 \subsubsection{GET\_MINMAX}
-\texttt{GET\_MINMAX} aggiorna i segnali \texttt{max\_pixel\_value} e \texttt{min\_pixel\_value}, inizializzati rispettivamente con $0$ e $255$, con il valore di \texttt{i\_data}. Questo avviene se e solo se si verifica che \texttt{i\_data} è \textit{maggiore} di \texttt{max\_pixel\_value} (in questo caso aggiorna \texttt{max\_pixel\_value}) oppure se \texttt{i\_data} è \textit{minore} di \texttt{min\_pixel\_value} (in questo caso aggiorna \texttt{min\_pixel\_value}). Infine, imposta lo stato prossimo a \texttt{READ\_PIXEL}
+\texttt{GET\_MINMAX} aggiorna i segnali \texttt{max\_pixel\_value} e \texttt{min\_pixel\_value}, inizializzati rispettivamente con $0$ e $255$, con il valore di \texttt{i\_data}. Questo avviene se e solo se si verifica che \texttt{i\_data} risulti \textit{maggiore} di \texttt{max\_pixel\_value} (in questo caso aggiorna \texttt{max\_pixel\_value}) oppure se \texttt{i\_data} risulti \textit{minore} di \texttt{min\_pixel\_value} (in questo caso aggiorna \texttt{min\_pixel\_value}). Infine, imposta lo stato prossimo a \texttt{READ\_PIXEL}
 %non so perche lo mette in viola
 
 \subsubsection{GET\_DELTA}
-\texttt{GET\_DELTA} è uno stato banale. Calcola la \textit{differenza} tra \texttt{max\_pixel\_value} e \texttt{min\_pixel\_value} e imposta lo stato prossimo a \texttt{WAIT\_MEM}.
+\texttt{GET\_DELTA} calcola la \textit{differenza} tra \texttt{max\_pixel\_value} e \texttt{min\_pixel\_value} e imposta lo stato prossimo a \texttt{WAIT\_MEM}.
 
 \pagebreak
 
 \subsubsection{CALC\_SHIFT}
-Lo stato \texttt{CALC\_SHIFT} si preoccupa di effettuare la riga $2$ dello speudo-codice riportato al paragrafo $1.2$.
+Lo stato \texttt{CALC\_SHIFT} si occupa di effettuare la riga $2$ dello speudo-codice riportato al paragrafo $1.2$.
 Per effettuare il calcolo, richiama se stesso (attraverso lo stato \texttt{WAIT\_MEM}) aggiornando dei segnali d'appoggio. Nel dettaglio si potrebbe semplificare il tutto con il seguente pseudo-codice:
 \\
 \\
@@ -566,7 +566,7 @@ Per effettuare il calcolo, richiama se stesso (attraverso lo stato \texttt{WAIT\
 \\
 \\
 \\
-Sostanzialmente attraverso il ciclo \texttt{WHILE} si ricava \textit{k}, il quale non è altro che il valore di $\floor{log_2(delta\_value +1)}$. Questa procedura è forse quella più dispendiosa a livello di tempo e memoria, poichè per aggiornare ogni segnale si deve come minimo attendere due cicli di clock. Inoltre, la moltiplicazione tra due interi (\textit{t} e $2$) produce un risultato su $64$ \textit{bit} che VHDL gestisce troncando a $32$ \textit{bit}. Per le specifiche del progetto, ci si aspetta che \textit{k} non possa assumere un valore maggiore di $8$. Pertanto, si è certi che una variabile a $32$ \textit{bit} possa largamente contenere i valori desiderati.
+Sostanzialmente, attraverso il ciclo \texttt{WHILE}, si ricava \textit{k}, il quale non è altro che il valore di $\floor{log_2(delta\_value +1)}$. Questa procedura è forse quella più dispendiosa a livello di tempo e memoria poichè, per aggiornare ogni segnale, si deve come minimo attendere due cicli di clock. Inoltre, la moltiplicazione tra due interi (\textit{t} e $2$) produce un risultato su $64$ \textit{bit} che VHDL gestisce troncando a $32$ \textit{bit}. Per le specifiche del progetto, ci si aspetta che \textit{k} non possa assumere un valore maggiore di $8$. Pertanto, si è certi che una variabile a $32$ \textit{bit} possa largamente contenere i valori desiderati.
 
 \subsubsection{GET\_PIXEL}
 \texttt{GET\_PIXEL} è uno stato omonimo di \texttt{READ\_PIXEL}. La principale differenza del primo con il secondo è che mentre \texttt{READ\_PIXEL} effettua dei controlli sul flusso della computazione, \texttt{GET\_PIXEL} richiede solamente alla memoria il dato da leggere e imposta lo stato prossimo a \texttt{WAIT\_MEM}.
@@ -574,83 +574,25 @@ Sostanzialmente attraverso il ciclo \texttt{WHILE} si ricava \textit{k}, il qual
 \subsubsection{CALC\_NEWPIXEL}
 In \texttt{CALC\_NEWPIXEL} si calcola il nuovo valore del pixel da scrive in memoria.
 Per farlo, viene utilizzata una variabile di appoggio \texttt{pixel\_to\_shift} definita come uno \textit{std\_logic\_vector} da $16$ \textit{bit} e inizializzata come $\texttt{i\_data}-\texttt{min\_pixel\_value}$ con l’aggiunta di otto `$0$' in posizione più significativa.
-La variabile viene, quindi, shiftata e su di essa viene fatto il seguente controllo: se risulta essere minore di $255$ allora aggiorniamo il segnale \texttt{new\_pixel} al suo valore in \textit{std\_logic\_vector} su $8$ \textit{bit}, altrimenti il segnale \texttt{new\_pixel} viene impostato a $255$ sempre in \textit{std\_logic\_vector} su $8$ \textit{bit}.
+La variabile viene quindi shiftata e su di essa viene fatto il seguente controllo: se risulta essere minore di $255$ aggiorniamo il segnale \texttt{new\_pixel} con le otto cifre meno significative di \texttt{pixel\_to\_shift}, altrimenti il segnale \texttt{new\_pixel} viene impostato a $255$. Si noti che \texttt{new\_pixel} è un segnale \textit{std\_logic\_vector} su $8$ \textit{bit}.
 
 \subsubsection{WRITE\_PIXEL}
 Lo stato \texttt{WRITE\_PIXEL} si assicura che il valore del nuovo pixel calcolato sia scritto in memoria, incrementa tutti i contatori e controlla di non essere arrivato al termine della computazione. Il controllo usufruisce della varibile intera \texttt{last}, che assume il valore di $2*\texttt{n\_col}*\texttt{n\_row}+2$, ovvero l'indice dell'ultimo pixel scrivibile. Quando il contatore assume questo valore lo stato successivo viene impostato a \texttt{DONE} (sempre attravero \texttt{WAIT\_MEM}), altrimenti viene impostato lo stato prossimo a \texttt{ABILIT\_READ}, dove la scrittura viene disabilitata e viene riabilitata la lettura per il pixel successivo. Anche qui, si noti che il calcolo di \texttt{last} è sicuramente contenibile in una varibile a $32$ \textit{bit}.
 
 \subsubsection{DONE}
 \texttt{DONE} chiude tutte le comunicazioni con la memoria, riportando a `$0$' sia \texttt{o\_en} che \texttt{o\_we} e pulendo il buffer di \texttt{o\_address} e \texttt{o\_data}.
-Successivamente il segnale \texttt{o\_done} viene portato ad `$1$' e lo stato prossimo è impostato a \texttt{ WAITING\_PIC}.
+Successivamente, il segnale \texttt{o\_done} viene portato ad `$1$' e lo stato prossimo impostato a \texttt{ WAITING\_PIC}.
 
 
-\subsubsection{WAITINGPIC}
+\subsubsection{WAITING\_PIC}
 Ultimo stato del processo. Ha lo scopo di restare in attesa che il segnale di \texttt{i\_start} venga riportato a `$0$'. Finche ciò non avviene, \texttt{ WAITING\_PIC} richiama se stesso. Quando sia \texttt{i\_start} che \texttt{o\_done} hanno il segnale a `$0$', imposta lo stato prossimo a \texttt{START} facendo ricominciare l’intera compilazione.
 
 \subsection{Approfondimento sul process STATES}
-All'interno del process \texttt{STATES} si possono notare due macro momenti della computazione. Il primo è quello descritto dalla prima lettura completa della memoria (da \texttt{START} a \texttt{GET\_PIXEL}), attraverso la quale si determinano tutti i valori necessari per la computazione del nuovo pixel. Si noti inoltre che all'interno del primo momento abbiamo due cicli ben distinti: uno per il calcolo del \textit{max\_value} e \textit{min\_value} e uno per il calcolo dello \textit{shift\_level}. Il secondo momento (fino a \texttt{DONE}), invece, è descritto dalla seconda lettura semi-completa della memoria (difatto si esclude la lettura dei primi $2$ \textit{byte}) ed è il momento nel quale il pixel appena letto viene rielaborato e salvato in memoria nel \textit{byte} opportuno. Questa doppia lettura della memoria, sebbene aumenti la complessità temporale, è strettamente necessaria, per via del calcolo del \textit{delta}. Iniziamente, si era pensato di ottimizzare il secondo momento con due proeccess paralleli: il primo avrebbe elaborato i pixel pari, mentre il secondo i pixel dispari, e sarebbero stati gestiti da opportuni `semafori'. Tuttavia, la struttura attuale è risultata essere molto più stabile nei test, permettendoci anche di variare a nostra discrezione il tempo di clock della computazione.
+All'interno del process \texttt{STATES} si possono notare due macro momenti della computazione. Il primo è quello descritto dalla prima lettura completa della memoria (da \texttt{START} a \texttt{GET\_PIXEL}), attraverso la quale si determinano tutti i valori necessari per la computazione del nuovo pixel. Si noti che all'interno del primo momento abbiamo due cicli ben distinti: uno per il calcolo del \textit{max\_value} e \textit{min\_value} e uno per il calcolo dello \textit{shift\_level}. Il secondo momento (fino a \texttt{DONE}), invece, è descritto dalla seconda lettura semi-completa della memoria (difatto si esclude la lettura dei primi $2$ \textit{byte}) ed è il momento nel quale il pixel appena letto viene rielaborato e salvato in memoria nel \textit{byte} opportuno. Questa doppia lettura della memoria, sebbene aumenti la complessità temporale, è strettamente necessaria, per via del calcolo del \textit{delta}. Iniziamente, si era pensato di ottimizzare il secondo momento con due process paralleli: il primo avrebbe elaborato i pixel pari, mentre il secondo i pixel dispari, e sarebbero stati gestiti da opportuni `semafori'. Tuttavia, la struttura attuale è risultata essere molto più stabile nei test, permettendoci anche di variare a nostra discrezione il tempo di clock della computazione.
 \includegraphics[width=16cm, height=11.5cm]{FSM.png}
-%\pagebreak
-%\subsubsection{Schema process STATES}
-%FSA
-%\vspace{0.5 cm}
-%\begin{center}
-%\resizebox{!}{24cm}{
-%\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2cm,
-%        scale = 1,transform shape, on grid]
-
-%  \node[state] (start) [scale=1] {$START$};
-%  \node[state] (init) [below=of start, scale=1]  {$INIT$};
-%  \node[state] (abilitread) [below= of init, scale=0.5]  {$ABILIT\_READ$};
-%  \node[state] (getrc) [below=of abilitread, scale=0.8, yshift=-0.5cm]  {$GET\_RC$};
-%  \node[state] (getdim) [below=of getrc, scale=0.6]  {$GET\_DIM$};
-%  \node[state] (readpixel) [below=of getdim, scale=0.5]  {$READ\_PIXEL$};
-%  \node[state] (getminmax) [below =of readpixel, scale=0.5] {$GET\_MINMAX$};
-%  \node[state] (getdelta) [below =of getminmax, scale=0.5] {$GET\_DELTA$};
-%  \node[state] (calcshift) [below=of getdelta, scale=0.5]  {$CALC\_SHIFT$};
-%  \node[state] (getpixel) [below=of calcshift, scale=0.5 ]  {$GET\_PIXEL$};
-%  \node[state] (calcnewpixel) [below=of getpixel, scale=0.5]  {$CALC\_NEWPIXEL$};
-%  \node[state] (abilitwrite) [below=of calcnewpixel, scale=0.5, yshift=-1cm]  {$ABILIT\_WRITE$};
-%  \node[state] (writepixel) [below=of abilitwrite, scale=0.5, yshift=-1cm]  {$WRITE\_PIXEL$};
-%  \node[state] (done) [below=of writepixel, scale=0.7]  {$DONE$};
-%  \node[state] (waitingpic) [below=of done, scale=0.6]  {$WAITINGPIC$};
-%  \node[state] (waitmem) [right=of calcshift, xshift=8cm, scale=1.2]  {$WAIT\_MEM$};
-
-%  \draw (start) edge[red] node{} (init)
-%        (init) edge[red] node{} (abilitread)
-%        (abilitread) edge[red] node{} (getrc)
-%        (getrc) edge[bend left, out=60, in=45, looseness=1, red] node{} (waitmem)
-%        (waitmem) edge[bend right, in=-100, out=200, looseness=2, red] node{} (getrc)
-%        (getdim) edge[bend left, in=120, red] node{} (waitmem)
-%        (waitmem) edge[bend right, out=-70, in=-100, red] node{} (getdim)
-%        (readpixel) edge[bend left, out=50, in=130, blue] node{} (waitmem)
-%        (waitmem) edge[bend right, out=-30, blue] node{} (getminmax)
-%        (getminmax) edge[blue] node{} (readpixel)
-%        (readpixel) edge[bend right=90, red] node{} (getdelta)
-%        (waitmem) edge [bend right, out=-30, red] node{} (readpixel)
-%        (getdelta) edge[bend left, red] node{} (waitmem)
-%        (waitmem) edge[bend right=20, brown] node{} (calcshift)
-%        (calcshift) edge[bend right=20, brown] node{} (waitmem)
-%        (calcshift) edge[red] node{} (getpixel)
-%        (getpixel) edge[bend right, green] node{} (waitmem)
-%        (waitmem) edge[bend left, out=70, green] node{} (calcnewpixel)
-%        (calcnewpixel) edge[green] node{} (abilitwrite)
-%        (abilitwrite) edge[green] node{} (writepixel)
-%        (writepixel) edge[bend right, in=-80, green] node{} (waitmem)
-%        (writepixel) edge[bend left, in=140, green] node{} (abilitread)
-%        (abilitread) edge[bend right, green] node{} (getpixel)
-%        (waitmem) edge[bend left, out=100, looseness=2, green] node{} (done)
-%        (done) edge[green] node{} (waitingpic)
-%        (waitingpic) edge[bend left] node{} (start)
-%        ;
-%\end{tikzpicture}
-%}
-%\end{center}
-
-%\pagebreak
 \section{Risultati dei Test}
 I test eseguiti sono stati pensati appositamente per evitare eventuali errori di programmazione, cercando di coprire il maggior numero di casi possibili. Per farlo, non solo sono stati creati dei test manualmente (dal \texttt{N.$1$} al \texttt{N.$5$} ), ma si è fatto ricorso sia al linguaggio \texttt{C} sia al linguaggio \texttt{Python} per la creazione di veri e propri generatori di test. Entrambi i generatori sono in grado di creare un numero di immagini (di dimensione diversa) in base alla decisione dell'utente. \\
-I test creati dai generatori sono stati a loro volta controllati manualmente. Difatto, dal controllo manuale, è emerso che le funzioni delle librerie randomiche nei due linguaggi, essendo uniformemente distribuite, rendevano praticamente certa la presenza dei valori $0$ e $255$ in una qualsiasi immmagine dalle dimensioni maggiori di 20x20. Immagini che hanno all'interno valori molto distanti tra loro rendono l'equalizzazione dell'immagine inutile. Un \textit{delta} molto grande porta inevitabilmente ad uno \textit{shift} nullo, il che significa che l'immagine non viene equalizzata ma semplicemente copiata. Per evitare, quindi, che i test fossero dei semplici copia-incolla, si è deciso di adottare una distribuzione Gaussiana, avendo così immagini con \textit{shift} di livello $8$ molto più probabili di quelli con \textit{shift} nullo. Dopo questa verifica e vista la semplicità nella scrittura di quest'algoritmo in un linguaggio ad alto livello si è supposta veritiera la correttezza dei test prodotti dai generatori. \\
+I test creati dai generatori sono stati a loro volta controllati manualmente. Difatto, dal controllo manuale, è emerso che le funzioni delle librerie randomiche nei due linguaggi, essendo uniformemente distribuite, rendevano praticamente certa la presenza dei valori $0$ e $255$ in una qualsiasi immmagine dalle dimensioni maggiori di 20x20. Immagini che hanno all'interno valori molto distanti tra loro rendono l'equalizzazione dell'immagine inutile. Un \textit{delta} molto grande porta inevitabilmente ad uno \textit{shift} nullo, il che significa che l'immagine non viene equalizzata ma semplicemente copiata. Per evitare, quindi, che i test fossero dei semplici copia-incolla, si è deciso di adottare una distribuzione Gaussiana, avendo così immagini con \textit{shift} di livello $8$ molto più probabili di quelli con \textit{shift} nullo. Dopo questa verifica e vista la semplicità nella scrittura di quest'algoritmo in un linguaggio ad alto livello, si è supposta veritiera la correttezza dei test prodotti dai generatori. \\
 I test in questione hanno ottenuto i seguenti risultati:
 \begin{center}
   \begin{tabular}{|c|l|p{8.5cm}|r|}
@@ -674,7 +616,7 @@ I test in questione hanno ottenuto i seguenti risultati:
   \end{tabular}
 \end{center}
 In realtà sono stati fatti ulteriori test, con diverso numero di immagini, di varie dimensioni e con \textit{reset} ``casuale", tuttavia riportare ulteriori test a quelli presentati risulterebbe ridondante.
-Si noti inoltre che, per verificare la robustezza del codice, il periodo di \textit{clock} è stato impostato sempre in modo casuale per un qualsiasi valore compreso tra l' $1.1$ \textit{ns} e i $100$ \textit{ns}. Il periodo di \textit{clock} minimo supportato dal nostro processore è risultato essere $1.1$ \textit{ns}. Per completezza i test sono stati fatti sia in pre-sintesi che in post-sintesi.
+Si noti inoltre che, per verificare la robustezza del codice, il periodo di \textit{clock} è stato impostato sempre in modo casuale. In particolare, il periodo di \textit{clock} minimo supportato dal nostro processore è risultato essere $1.1$ \textit{ns}. Per completezza i test sono stati fatti sia in pre-sintesi che in post-sintesi.
 \pagebreak
 
 \subsection{Esempi di equalizzazione}
